@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +18,7 @@ public class PlayerIdle : IState
 
     public void OnExit()
     {
-        
+
     }
 
     public void OnUpdate()
@@ -26,14 +27,16 @@ public class PlayerIdle : IState
         {
             if ((Input.GetAxisRaw("Horizontal") > 0f || Input.GetAxisRaw("Horizontal") < 0f) && !_unitController.FindState(State.ATTACK))
             {
-                _unitController.ExitState(State.IDLE);
-                _unitController.EnterState(State.MOVE);
+                _unitController.photonView.RPC("ExitState", RpcTarget.AllBuffered, State.IDLE);
+                _unitController.photonView.RPC("EnterState", RpcTarget.AllBuffered, State.MOVE);
+                //_unitController.ExitState(State.IDLE);
+                //_unitController.EnterState(State.MOVE);
             }
         }
     }
 
     public void OnFixedUpdate()
     {
-        
+
     }
 }

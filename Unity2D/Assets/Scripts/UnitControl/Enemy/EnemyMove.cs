@@ -23,7 +23,7 @@ public class EnemyMove : IState, IPunObservable
         _moveDuration = Random.Range(1, 4);
         _randomMoveX = Random.Range(-1, 2);
 
-        if(_randomMoveX != 0)
+        if (_randomMoveX != 0)
             _unitController.PlayAnimation(State.MOVE);
     }
 
@@ -57,8 +57,10 @@ public class EnemyMove : IState, IPunObservable
             _count += Time.fixedDeltaTime;
             if (_count >= _moveDuration)
             {
-                _unitController.ExitState(State.MOVE);
-                _unitController.EnterState(State.IDLE);
+                _unitController.photonView.RPC("ExitState", RpcTarget.AllBuffered, State.MOVE);
+                _unitController.photonView.RPC("EnterState", RpcTarget.AllBuffered, State.IDLE);
+                //_unitController.ExitState(State.MOVE);
+                //_unitController.EnterState(State.IDLE);
             }
 
             if (_randomMoveX != 0)
@@ -74,7 +76,7 @@ public class EnemyMove : IState, IPunObservable
             stream.SendNext(_moveDuration);
             stream.SendNext(_randomMoveX);
         }
-        else if(stream.IsReading)
+        else if (stream.IsReading)
         {
             _count = (float)stream.ReceiveNext();
             _moveDuration = (float)stream.ReceiveNext();

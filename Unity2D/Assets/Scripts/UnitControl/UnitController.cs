@@ -25,7 +25,8 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
         {
             _isGrounded = value;
             if (_isGrounded)
-                ExitState(State.JUMP);
+                photonView.RPC("ExitState", RpcTarget.AllBuffered, State.JUMP);
+            //ExitState(State.JUMP);
         }
     }
 
@@ -40,7 +41,7 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
 
     protected Dictionary<State, IState> _stateDic = new Dictionary<State, IState>();
     protected List<IState> _iStateArr = new List<IState>();
-    [SerializeField] protected List<State> _stateArr = new List<State>();
+    protected List<State> _stateArr = new List<State>();
 
     protected Vector3 _curPos;
 
@@ -56,16 +57,21 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
 
     protected virtual void Update()
     {
-        for (int i = 0; i < _iStateArr.Count; i++)
-            _iStateArr[i].OnUpdate();
+        if (photonView.IsMine)
+        {
+            for (int i = 0; i < _iStateArr.Count; i++)
+                _iStateArr[i].OnUpdate();
+        }
     }
 
     protected virtual void FixedUpdate()
     {
-        for (int i = 0; i < _iStateArr.Count; i++)
-            _iStateArr[i].OnFixedUpdate();
-
-        if (!_photonView.IsMine)
+        if (photonView.IsMine)
+        {
+            for (int i = 0; i < _iStateArr.Count; i++)
+                _iStateArr[i].OnFixedUpdate();
+        }
+        else
         {
             if ((transform.position - _curPos).sqrMagnitude >= 100f)
                 transform.position = _curPos;
@@ -113,7 +119,7 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
     public void Jump()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 0.5f, 1 << LayerMask.NameToLayer("Ground"));
-        if (hit)
+        if (hit && _photonView.IsMine)
         {
             _photonView.RPC("JumpRPC", RpcTarget.All);
         }
@@ -138,6 +144,7 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
 
     }
 
+    [PunRPC]
     public void EnterState(State state)
     {
         if (!_stateArr.Contains(state))
@@ -149,6 +156,7 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
+    [PunRPC]
     public void ExitState(State state)
     {
         if (_stateArr.Contains(state))

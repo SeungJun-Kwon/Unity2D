@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UnitJump : IState
+public class UnitJump : IState, IPunObservable
 {
     UnitController _unitController;
 
@@ -35,6 +35,19 @@ public class UnitJump : IState
 
     public void OnUpdate()
     {
-        
+
     }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(_unitController.IsGrounded);
+        }
+        else if (stream.IsReading)
+        {
+            _unitController.IsGrounded = (bool)stream.ReceiveNext();
+        }
+    }
+
 }

@@ -23,14 +23,11 @@ public class ChannelSelectManager : MonoBehaviourPunCallbacks
         _leaveButton.interactable = false;
 
         NetworkManager.Instance.JoinedLobbyEvent.AddListener(ActiveChannels);
-
-        if (PhotonNetwork.IsMasterClient)
-            Debug.Log("123");
     }
 
     public void ActiveChannels()
     {
-        foreach(var c in _channels)
+        foreach (var c in _channels)
             c.interactable = true;
         _joinButton.interactable = true;
     }

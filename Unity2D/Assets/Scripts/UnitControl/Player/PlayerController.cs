@@ -22,7 +22,6 @@ public class PlayerController : UnitController
         _stateDic.Add(State.IDLE, new PlayerIdle(this));
         _stateDic.Add(State.MOVE, new PlayerMove(this));
         _stateDic.Add(State.ATTACK, new PlayerAttack(this));
-        EnterState(State.IDLE);
 
         transform.Find("Canvas").gameObject.TryGetComponent(out _canvas);
         _nickName.text = _photonView.IsMine ? PhotonNetwork.NickName : _photonView.Owner.NickName;
@@ -30,14 +29,15 @@ public class PlayerController : UnitController
 
         if (_photonView.IsMine)
         {
+            EnterState(State.IDLE);
             GameObject.Find("CMvcam").TryGetComponent(out CinemachineVirtualCamera cm);
             cm.Follow = transform;
             cm.LookAt = transform;
         }
 
-        foreach(Transform i in GetComponentsInChildren<Transform>())
+        foreach (Transform i in GetComponentsInChildren<Transform>())
         {
-            if(i.name == "Weapon")
+            if (i.name == "Weapon")
             {
                 i.gameObject.TryGetComponent(out _weaponCol);
                 //if (_weaponCol && _weaponCol.isActiveAndEnabled)
@@ -63,7 +63,7 @@ public class PlayerController : UnitController
 
     public override void PlayAnimation(State state)
     {
-        switch(state)
+        switch (state)
         {
             case State.IDLE:
                 _animator.SetBool("IsWalking", false);
@@ -89,14 +89,14 @@ public class PlayerController : UnitController
 
     public void TryAttack()
     {
-        var hit = Physics2D.BoxCastAll(_collider.bounds.center, new Vector2(0.1f, _attackRange.y), 0, 
+        var hit = Physics2D.BoxCastAll(_collider.bounds.center, new Vector2(0.1f, _attackRange.y), 0,
                                         Vector2.right * transform.localScale.x * -1, _attackRange.x, LayerMask.GetMask("Enemy"));
 
         if (hit.Length > 0)
         {
             foreach (var i in hit)
             {
-                if(i.transform.gameObject.TryGetComponent(out EnemyController enemyController))
+                if (i.transform.gameObject.TryGetComponent(out EnemyController enemyController))
                 {
                     enemyController.Hurt();
                 }

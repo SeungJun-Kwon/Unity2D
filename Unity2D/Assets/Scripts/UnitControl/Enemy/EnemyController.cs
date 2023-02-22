@@ -11,7 +11,10 @@ public class EnemyController : UnitController
         base.Awake();
         _stateDic.Add(State.IDLE, new EnemyIdle(this));
         _stateDic.Add(State.MOVE, new EnemyMove(this));
-        EnterState(State.IDLE);
+        if (photonView.IsMine)
+        {
+            EnterState(State.IDLE);
+        }
     }
 
     private void Start()

@@ -30,16 +30,6 @@ public class EnemyIdle : IState, IPunObservable
 
     public void OnUpdate()
     {
-        //if (_unitController.photonView.IsMine)
-        //{
-        //    var hit = Physics2D.BoxCast(_unitController._collider.bounds.center, new Vector2(_range, _unitController._collider.bounds.size.y), 0f, Vector2.up, 0f, LayerMask.GetMask("Player"));
-        //    if (hit)
-        //    {
-        //        _unitController._target = hit.transform;
-        //        _unitController.ExitState(State.IDLE);
-        //        _unitController.EnterState(State.MOVE);
-        //    }
-        //}
     }
 
     public void OnFixedUpdate()
@@ -49,20 +39,22 @@ public class EnemyIdle : IState, IPunObservable
             _count += Time.fixedDeltaTime;
             if (_count >= _moveDuration)
             {
-                _unitController.ExitState(State.IDLE);
-                _unitController.EnterState(State.MOVE);
+                _unitController.photonView.RPC("ExitState", RpcTarget.AllBuffered, State.IDLE);
+                _unitController.photonView.RPC("EnterState", RpcTarget.AllBuffered, State.MOVE);
+                //_unitController.ExitState(State.IDLE);
+                //_unitController.EnterState(State.MOVE);
             }
         }
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        if(stream.IsWriting)
+        if (stream.IsWriting)
         {
             stream.SendNext(_count);
             stream.SendNext(_moveDuration);
         }
-        else if(stream.IsReading)
+        else if (stream.IsReading)
         {
             _count = (float)stream.ReceiveNext();
             _moveDuration = (float)stream.ReceiveNext();

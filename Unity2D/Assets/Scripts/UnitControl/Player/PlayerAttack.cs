@@ -1,8 +1,9 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAttack : IState
+public class PlayerAttack : IState, IPunObservable
 {
     PlayerController _unitController;
 
@@ -37,17 +38,32 @@ public class PlayerAttack : IState
 
     public void OnFixedUpdate()
     {
-        
+
     }
 
     public void OnUpdate()
     {
         _count += Time.deltaTime;
-        if(_count > _attackDuration)
+        if (_count > _attackDuration)
         {
-            _unitController.ExitState(State.ATTACK);
-            _unitController.EnterState(State.IDLE);
+            _unitController.photonView.RPC("ExitState", RpcTarget.AllBuffered, State.ATTACK);
+            _unitController.photonView.RPC("EnterState", RpcTarget.AllBuffered, State.IDLE);
+            //_unitController.ExitState(State.ATTACK);
+            //_unitController.EnterState(State.IDLE);
         }
-        Debug.DrawRay(_unitController._collider.bounds.center, Vector2.right * _unitController.transform.localScale.x * -1, Color.red);
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(_count);
+            stream.SendNext(_attackDuration);
+        }
+        else if (stream.IsReading)
+        {
+            _count = (float)stream.ReceiveNext();
+            _attackDuration = (float)stream.ReceiveNext();
+        }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
-using UnityEngine.UI;
 using System;
 using UnityEngine.Events;
 
@@ -17,7 +16,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks, IConnectionCallbacks
 
     private void Awake()
     {
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(this);
@@ -54,42 +53,10 @@ public class NetworkManager : MonoBehaviourPunCallbacks, IConnectionCallbacks
         PhotonNetwork.JoinLobby();
     }
 
-    public void JoinOrCreateRoom(string roomName)
-    {
-        PhotonNetwork.JoinOrCreateRoom(roomName, new RoomOptions { MaxPlayers = 5 }, null);
-        _roomName = roomName;
-    }
-
-    public void ChangeRoom(string roomName)
-    {
-        float count = 0f;
-        if(PhotonNetwork.InRoom)
-            PhotonNetwork.LeaveRoom();
-
-        while (!PhotonNetwork.InLobby)
-        {
-            count++;
-            if(count > 100000)
-                throw new Exception("Infinite Loop");
-        }
-
-        JoinOrCreateRoom(roomName);
-    }
-
-    public void LeaveRoom()
-    {
-        if (PhotonNetwork.InRoom)
-            PhotonNetwork.LeaveRoom();
-    }
-
     public override void OnJoinedLobby()
     {
         Debug.Log("로비 연결");
         JoinedLobbyEvent.Invoke();
-    }
-
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
     }
 
     public override void OnJoinedRoom()
@@ -115,8 +82,32 @@ public class NetworkManager : MonoBehaviourPunCallbacks, IConnectionCallbacks
         LeftRoomEvent.Invoke();
     }
 
-    public override void OnDisconnected(DisconnectCause cause)
+    public void JoinOrCreateRoom(string roomName)
     {
+        PhotonNetwork.JoinOrCreateRoom(roomName, new RoomOptions { MaxPlayers = 5 }, null);
+        _roomName = roomName;
+    }
+
+    public void ChangeRoom(string roomName)
+    {
+        float count = 0f;
+        if (PhotonNetwork.InRoom)
+            PhotonNetwork.LeaveRoom();
+
+        while (!PhotonNetwork.InLobby)
+        {
+            count++;
+            if (count > 100000)
+                throw new Exception("Infinite Loop");
+        }
+
+        JoinOrCreateRoom(roomName);
+    }
+
+    public void LeaveRoom()
+    {
+        if (PhotonNetwork.InRoom)
+            PhotonNetwork.LeaveRoom();
     }
 
     public void Spawn()

@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +20,7 @@ public class PlayerMove : IState
 
     public void OnExit()
     {
-        
+
     }
 
     public void OnUpdate()
@@ -30,15 +31,17 @@ public class PlayerMove : IState
 
             if (_moveX == 0)
             {
-                _unitController.ExitState(State.MOVE);
-                _unitController.EnterState(State.IDLE);
+                _unitController.photonView.RPC("ExitState", RpcTarget.AllBuffered, State.MOVE);
+                _unitController.photonView.RPC("EnterState", RpcTarget.AllBuffered, State.IDLE);
+                //_unitController.ExitState(State.MOVE);
+                //_unitController.EnterState(State.IDLE);
             }
         }
     }
 
     public void OnFixedUpdate()
     {
-        if(_unitController._photonView.IsMine && _moveX != 0)
+        if (_unitController._photonView.IsMine && _moveX != 0)
             _unitController.Move(_moveX);
     }
 }
