@@ -1,7 +1,10 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyController : UnitController
 {
+    [SerializeField] Text _state;
+
     [HideInInspector] public Transform _target;
 
     Vector3 _originPos;
@@ -25,6 +28,10 @@ public class EnemyController : UnitController
     protected override void Update()
     {
         base.Update();
+        string s = "";
+        foreach (var state in _stateArr)
+            s += state.ToString() + " ";
+        _state.text = s;
     }
 
     protected override void FixedUpdate()

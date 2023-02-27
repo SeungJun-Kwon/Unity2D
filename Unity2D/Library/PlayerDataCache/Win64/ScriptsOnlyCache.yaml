@@ -602,7 +602,7 @@ ScriptsOnlyBuild:
     className: CloudRegionProperty
   - hash:
       serializedVersion: 2
-      Hash: a37022752b94fbea5dcc493149358c4c
+      Hash: 14c8076e34268fb8f1fe64ec2e1efe28
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: PlayerController
@@ -1160,7 +1160,7 @@ ScriptsOnlyBuild:
     className: SetRoomCustomPropertyUIForm
   - hash:
       serializedVersion: 2
-      Hash: 28ee2d9042f0b962292dd88e25ab5632
+      Hash: 226f20f8a8f4409b58d934f86a8653f7
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: EnemyController
@@ -1472,7 +1472,7 @@ ScriptsOnlyBuild:
     className: UnityOnPointerClickMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 4d80e5960cb083571d696e231c5e2b2d
+      Hash: f3b8e459955406c4fd41daa40e7e6392
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: UnitController
