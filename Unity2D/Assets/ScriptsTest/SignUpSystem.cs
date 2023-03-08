@@ -7,8 +7,22 @@ using UnityEngine.UI;
 public class SignUpSystem : MonoBehaviour
 {
     [SerializeField] TMP_InputField _nameInput, _idInput, _pwInput;
-    [SerializeField] Button _signUpBt, _cancelBt;
     string _name, _id, _pw;
+
+    bool _result;
+    bool Result
+    {
+        get
+        {
+            return _result;
+        }
+        set
+        {
+            _result = value;
+            if(_result)
+                gameObject.SetActive(false);
+        }
+    }
 
     bool Check()
     {
@@ -22,7 +36,7 @@ public class SignUpSystem : MonoBehaviour
         return true;
     }
 
-    public void SignUp()
+    public async void SignUp()
     {
         if (!Check())
         {
@@ -30,8 +44,8 @@ public class SignUpSystem : MonoBehaviour
             return;
         }
 
-        FirebaseAuthManager.Instance.SignUp(_id, _pw);
+        UserInfo userInfo = new UserInfo(_name);
 
-        gameObject.SetActive(false);
+        Result = await FirebaseAuthManager.Instance.SignUp(_id, _pw, userInfo);
     }
 }

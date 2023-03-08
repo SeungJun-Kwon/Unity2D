@@ -6,30 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class UserInfo
-{
-    public string userName;
-    public int userLv;
-    public float userHp;
-    public float userMp;
-
-    public UserInfo(string name)
-    {
-        userName = name;
-        userLv = 1;
-        userHp = 50;
-        userMp = 20;
-    }
-
-    public UserInfo(string userName, int userLv, float userHp, float userMp)
-    {
-        this.userName = userName;
-        this.userLv = userLv;
-        this.userHp = userHp;
-        this.userMp = userMp;
-    }
-}
-
 public class FirebaseReatimeDatabaseManager
 {
     private static FirebaseReatimeDatabaseManager instance;

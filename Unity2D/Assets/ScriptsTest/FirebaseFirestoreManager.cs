@@ -1,10 +1,34 @@
 using Firebase.Auth;
-using Firebase;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Firebase.Firestore;
 using System;
+using System.Threading.Tasks;
+
+public class UserInfo
+{
+    public string userName;
+    public int userLv;
+    public float userHp;
+    public float userMp;
+
+    public UserInfo(string name)
+    {
+        userName = name;
+        userLv = 1;
+        userHp = 50;
+        userMp = 20;
+    }
+
+    public UserInfo(string userName, int userLv, float userHp, float userMp)
+    {
+        this.userName = userName;
+        this.userLv = userLv;
+        this.userHp = userHp;
+        this.userMp = userMp;
+    }
+}
 
 public class FirebaseFirestoreManager
 {
@@ -27,9 +51,9 @@ public class FirebaseFirestoreManager
         _userStore = FirebaseFirestore.DefaultInstance;
     }
 
-    public void CreateUserInfo(FirebaseUser user)
+    public void CreateUserInfo(string userId, UserInfo userInfo)
     {
-        _userStore.Collection("users").Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
+        _userStore.Collection("users").Document(userId).GetSnapshotAsync().ContinueWith(task =>
         {
             if (task.IsFaulted)
             {
@@ -48,8 +72,6 @@ public class FirebaseFirestoreManager
             else
             {
                 // 새로운 사용자 데이터 생성 및 저장
-                string key = user.UserId;
-                UserInfo userInfo = new UserInfo(user.Email);
                 Dictionary<string, object> data = new Dictionary<string, object>
                 {
                     {"userName", userInfo.userName},
@@ -57,7 +79,7 @@ public class FirebaseFirestoreManager
                     {"userHp", userInfo.userHp},
                     {"userMp", userInfo.userMp}
                 };
-                _userStore.Collection("users").Document(key).SetAsync(data);
+                _userStore.Collection("users").Document(userId).SetAsync(data);
                 Debug.Log("New user added.");
             }
         });
@@ -123,5 +145,29 @@ public class FirebaseFirestoreManager
                     onComplete(null);
             }
         });
+    }
+
+    public async Task<UserInfo> LoadUserInfo(FirebaseUser user)
+    {
+        try
+        {
+            var result = await _userStore.Collection("users").Document(user.UserId).GetSnapshotAsync();
+            if (result.Exists)
+            {
+                string userName = result.GetValue<string>("userName");
+                int userLv = result.GetValue<int>("userLv");
+                float userHp = result.GetValue<float>("userHp");
+                float userMp = result.GetValue<float>("userMp");
+
+                return new UserInfo(userName, userLv, userHp, userMp);
+            }
+            else
+                return null;
+        }
+        catch(FirestoreException e)
+        {
+            Debug.Log($"유저 데이터 로드 실패 : {e.Message}");
+            return null;
+        }
     }
 }

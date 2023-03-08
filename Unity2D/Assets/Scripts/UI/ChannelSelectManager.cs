@@ -5,7 +5,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ChannelSelectManager : MonoBehaviourPunCallbacks
@@ -13,23 +12,11 @@ public class ChannelSelectManager : MonoBehaviourPunCallbacks
     [SerializeField] List<Button> _channels = new List<Button>();
     [SerializeField] Button _joinButton, _leaveButton;
     [SerializeField] Text _sellectedChannel;
-    [SerializeField] InputField _nickNameInput;
+    [SerializeField] TMP_Text _nickName;
 
-    private void Start()
+    public override void OnEnable()
     {
-        foreach (var c in _channels)
-            c.interactable = false;
-        _joinButton.interactable = false;
-        _leaveButton.interactable = false;
-
-        NetworkManager.Instance.JoinedLobbyEvent.AddListener(ActiveChannels);
-    }
-
-    public void ActiveChannels()
-    {
-        foreach (var c in _channels)
-            c.interactable = true;
-        _joinButton.interactable = true;
+        _nickName.text = PhotonNetwork.LocalPlayer.NickName;
     }
 
     public void OnClickedChannel()
@@ -47,12 +34,8 @@ public class ChannelSelectManager : MonoBehaviourPunCallbacks
         if (_sellectedChannel.text.Equals("null"))
             return;
 
-        if (!_nickNameInput.text.Equals(""))
-        {
-            NetworkManager.Instance.JoinOrCreateRoom(_sellectedChannel.text);
-            PhotonNetwork.LocalPlayer.NickName = _nickNameInput.text;
-            PhotonNetwork.LoadLevel("SampleScene");
-        }
+        NetworkManager.Instance.JoinOrCreateRoom(_sellectedChannel.text);
+        PhotonNetwork.LoadLevel("SampleScene");
     }
 
     public void OnClickedChange()

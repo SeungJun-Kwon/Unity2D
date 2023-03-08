@@ -1,7 +1,11 @@
+using Firebase;
 using Firebase.Auth;
+using Firebase.Firestore;
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -19,29 +23,18 @@ public class FirebaseAuthManager
         }
     }
 
-    public FirebaseUser _user;     // 인증이 완료된 유저 정보
+    public FirebaseUser _user = null;     // 인증이 완료된 유저 정보
 
     FirebaseAuth _auth;     // 로그인, 회원가입 등에 사용
 
     public void Init()
     {
         _auth = FirebaseAuth.DefaultInstance;
-
-        _auth.StateChanged += OnChanged;
     }
 
-    private void OnChanged(object sender, EventArgs e)
+    public void SignUp(string email, string pw, UserInfo userInfo, ref bool result)
     {
-        if(_auth.CurrentUser != _user)
-        {
-            bool signed = (_auth.CurrentUser != _user && _auth.CurrentUser != null);
-
-
-        }
-    }
-
-    public void SignUp(string email, string pw)
-    {
+        FirebaseUser user = null;
         _auth.CreateUserWithEmailAndPasswordAsync(email, pw).ContinueWith(task => 
         {
             if(task.IsCanceled)
@@ -56,13 +49,34 @@ public class FirebaseAuthManager
                 return;
             }
 
-            FirebaseUser user = task.Result;
-            FirebaseFirestoreManager.Instance.CreateUserInfo(user);
+            user = task.Result;
+            FirebaseFirestoreManager.Instance.CreateUserInfo(user.UserId, userInfo);
             Debug.Log("회원가입 완료");
         });
+
+        if (user != null)
+            result = true;
+        else
+            result = false;
     }
 
-    public void SignIn(string email, string pw)
+    // 해당 작업이 완전히 끝난 후 이 함수를 호출한 곳에서 다음 줄을 실행하기 위해 비동기로 작업이 끝날 때 까지 기다리도록 함
+    public async Task<bool> SignUp(string email, string pw, UserInfo userInfo)
+    {
+        try
+        {
+            var result = await _auth.CreateUserWithEmailAndPasswordAsync(email, pw);
+            FirebaseFirestoreManager.Instance.CreateUserInfo(result.UserId, userInfo);
+            return true;
+        }
+        catch(FirestoreException e)
+        {
+            Debug.Log($"회원가입 실패 : {e.Message}");
+            return false;
+        }
+    }
+
+    public void SignIn(string email, string pw, ref bool result)
     {
         _auth.SignInWithEmailAndPasswordAsync(email, pw).ContinueWith(task =>
         {
@@ -81,10 +95,34 @@ public class FirebaseAuthManager
             _user = task.Result;
             Debug.Log("로그인 완료");
         });
+
+        if (_user != null)
+            result = true;
+        else
+            result = false;
+    }
+
+    public async Task<bool> SignIn(string email, string pw)
+    {
+        try
+        {
+            var result = await _auth.SignInWithEmailAndPasswordAsync(email, pw);
+            _user = result;
+            var userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfo(_user);
+            if (userInfo != null)
+                PhotonNetwork.LocalPlayer.NickName = userInfo.userName;
+            return true;
+        }
+        catch(FirebaseException e)
+        {
+            Debug.Log($"로그인 실패 : {e.Message}");
+            return false;
+        }
     }
 
     public void SignOut()
     {
         _auth.SignOut();
+        _user = null;
     }
 }

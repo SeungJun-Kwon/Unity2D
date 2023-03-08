@@ -8,9 +8,26 @@ using UnityEngine.UI;
 public class SignInSystem : MonoBehaviour
 {
     [SerializeField] TMP_InputField _idInput, _pwInput;
-    [SerializeField] Button _signInBt, _signUpBt;
     [SerializeField] GameObject _signUpPanel, _channelSellector;
     string _id, _pw;
+
+    bool _result;
+    bool Result
+    {
+        get
+        {
+            return _result;
+        }
+        set
+        {
+            _result = value;
+            if(_result == true)
+            {
+                gameObject.SetActive(false);
+                _channelSellector.SetActive(true);
+            }
+        }
+    }
 
     private void Start()
     {
@@ -32,7 +49,7 @@ public class SignInSystem : MonoBehaviour
 
     public void OpenSignUp() => _signUpPanel.SetActive(true);
 
-    public void SignIn()
+    public async void SignIn()
     {
         if (!Check())
         {
@@ -40,17 +57,8 @@ public class SignInSystem : MonoBehaviour
             return;
         }
 
-        FirebaseAuthManager.Instance.SignIn(_id, _pw);
+        Result = await FirebaseAuthManager.Instance.SignIn(_id, _pw);
     }
 
-    public void SignUp()
-    {
-        if (!Check())
-        {
-            print("입력되지 않은 칸이 있습니다.");
-            return;
-        }
-
-        FirebaseAuthManager.Instance.SignUp(_id, _pw);
-    }
+    public void SignUp() => _signUpPanel.SetActive(true);
 }
