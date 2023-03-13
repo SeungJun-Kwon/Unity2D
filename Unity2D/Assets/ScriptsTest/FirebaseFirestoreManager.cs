@@ -6,27 +6,27 @@ using Firebase.Firestore;
 using System;
 using System.Threading.Tasks;
 
-public class UserInfo
+public class UnitInfo
 {
-    public string userName;
-    public int userLv;
-    public float userHp;
-    public float userMp;
+    public string name;
+    public int lv;
+    public float hp;
+    public float mp;
 
-    public UserInfo(string name)
+    public UnitInfo(string name)
     {
-        userName = name;
-        userLv = 1;
-        userHp = 50;
-        userMp = 20;
+        this.name = name;
+        lv = 1;
+        hp = 50;
+        mp = 20;
     }
 
-    public UserInfo(string userName, int userLv, float userHp, float userMp)
+    public UnitInfo(string name, int lv, float hp, float mp)
     {
-        this.userName = userName;
-        this.userLv = userLv;
-        this.userHp = userHp;
-        this.userMp = userMp;
+        this.name = name;
+        this.lv = lv;
+        this.hp = hp;
+        this.mp = mp;
     }
 }
 
@@ -51,7 +51,7 @@ public class FirebaseFirestoreManager
         _userStore = FirebaseFirestore.DefaultInstance;
     }
 
-    public void CreateUserInfo(string userId, UserInfo userInfo)
+    public void CreateUserInfo(string userId, UnitInfo userInfo)
     {
         _userStore.Collection("users").Document(userId).GetSnapshotAsync().ContinueWith(task =>
         {
@@ -66,7 +66,7 @@ public class FirebaseFirestoreManager
             // 해당 ID를 사용하는 사용자가 이미 존재하는 경우
             if (snapshot.Exists)
             {
-                Debug.LogWarning("UserInfo ID already exists.");
+                Debug.LogWarning("UnitInfo ID already exists.");
             }
             // 해당 ID를 사용하는 사용자가 존재하지 않는 경우
             else
@@ -74,10 +74,10 @@ public class FirebaseFirestoreManager
                 // 새로운 사용자 데이터 생성 및 저장
                 Dictionary<string, object> data = new Dictionary<string, object>
                 {
-                    {"userName", userInfo.userName},
-                    {"userLv", userInfo.userLv},
-                    {"userHp", userInfo.userHp},
-                    {"userMp", userInfo.userMp}
+                    {"userName", userInfo.name},
+                    {"userLv", userInfo.lv},
+                    {"userHp", userInfo.hp},
+                    {"userMp", userInfo.mp}
                 };
                 _userStore.Collection("users").Document(userId).SetAsync(data);
                 Debug.Log("New user added.");
@@ -85,7 +85,7 @@ public class FirebaseFirestoreManager
         });
     }
 
-    public void UpdateUserInfo(FirebaseUser user, UserInfo userInfo)
+    public void UpdateUserInfo(FirebaseUser user, UnitInfo userInfo)
     {
         _userStore.Collection("users").Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
         {
@@ -104,10 +104,10 @@ public class FirebaseFirestoreManager
                     string key = user.UserId;
                     Dictionary<string, object> data = new Dictionary<string, object>
                     {
-                        {"userName", userInfo.userName},
-                        {"userLv", userInfo.userLv},
-                        {"userHp", userInfo.userHp},
-                        {"userMp", userInfo.userMp}
+                        {"userName", userInfo.name},
+                        {"userLv", userInfo.lv},
+                        {"userHp", userInfo.hp},
+                        {"userMp", userInfo.mp}
                     };
                     _userStore.Collection("users").Document(key).SetAsync(data);
                     Debug.Log("User Data Updated");
@@ -116,7 +116,7 @@ public class FirebaseFirestoreManager
         });
     }
 
-    public void LoadUserInfo(FirebaseUser user, System.Action<UserInfo> onComplete)
+    public void LoadUserInfo(FirebaseUser user, System.Action<UnitInfo> onComplete)
     {
         _userStore.Collection("users").Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
         {
@@ -138,7 +138,7 @@ public class FirebaseFirestoreManager
                     float userHp = snapshot.GetValue<float>("userHp");
                     float userMp = snapshot.GetValue<float>("userMp");
 
-                    UserInfo userInfo = new UserInfo(userName, userLv, userHp, userMp);
+                    UnitInfo userInfo = new UnitInfo(userName, userLv, userHp, userMp);
                     onComplete(userInfo);
                 }
                 else
@@ -147,7 +147,7 @@ public class FirebaseFirestoreManager
         });
     }
 
-    public async Task<UserInfo> LoadUserInfo(FirebaseUser user)
+    public async Task<UnitInfo> LoadUserInfo(FirebaseUser user)
     {
         try
         {
@@ -159,7 +159,7 @@ public class FirebaseFirestoreManager
                 float userHp = result.GetValue<float>("userHp");
                 float userMp = result.GetValue<float>("userMp");
 
-                return new UserInfo(userName, userLv, userHp, userMp);
+                return new UnitInfo(userName, userLv, userHp, userMp);
             }
             else
                 return null;

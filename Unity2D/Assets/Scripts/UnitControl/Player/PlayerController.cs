@@ -7,23 +7,11 @@ using Cinemachine;
 using Unity.VisualScripting;
 using System;
 
-public class UserData {
-    string _name;
-    string _lv;
-
-    public UserData(string name, string lv)
-    {
-        _name = name;
-        _lv = lv;
-    }
-}
 public class PlayerController : UnitController
 {
     [SerializeField] Text _nickName;
     [SerializeField] Image _hpBar;
     [SerializeField] Vector2 _attackRange;
-
-    [HideInInspector] public UserData _userData;
 
     [HideInInspector] public BoxCollider2D _weaponCol;
 
@@ -60,6 +48,12 @@ public class PlayerController : UnitController
         }
     }
 
+    private void Start()
+    {
+        photonView.RPC("LoadUserInfo", RpcTarget.AllBuffered);
+        photonView.RPC("SyncInit", RpcTarget.AllBuffered);
+    }
+
     protected override void Update()
     {
         base.Update();
@@ -72,6 +66,15 @@ public class PlayerController : UnitController
             if (Input.GetButton("Attack"))
                 Attack();
         }
+    }
+
+    [PunRPC]
+    async void LoadUserInfo()
+    {
+        var result = await FirebaseFirestoreManager.Instance.LoadUserInfo(FirebaseAuthManager.Instance._user);
+
+        if (result != null)
+            _unitInfo = result;
     }
 
     public override void PlayAnimation(State state)

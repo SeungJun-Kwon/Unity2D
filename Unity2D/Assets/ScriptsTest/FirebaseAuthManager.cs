@@ -32,7 +32,7 @@ public class FirebaseAuthManager
         _auth = FirebaseAuth.DefaultInstance;
     }
 
-    public void SignUp(string email, string pw, UserInfo userInfo, ref bool result)
+    public void SignUp(string email, string pw, UnitInfo userInfo, ref bool result)
     {
         FirebaseUser user = null;
         _auth.CreateUserWithEmailAndPasswordAsync(email, pw).ContinueWith(task => 
@@ -61,7 +61,7 @@ public class FirebaseAuthManager
     }
 
     // 해당 작업이 완전히 끝난 후 이 함수를 호출한 곳에서 다음 줄을 실행하기 위해 비동기로 작업이 끝날 때 까지 기다리도록 함
-    public async Task<bool> SignUp(string email, string pw, UserInfo userInfo)
+    public async Task<bool> SignUp(string email, string pw, UnitInfo userInfo)
     {
         try
         {
@@ -110,7 +110,7 @@ public class FirebaseAuthManager
             _user = result;
             var userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfo(_user);
             if (userInfo != null)
-                PhotonNetwork.LocalPlayer.NickName = userInfo.userName;
+                PhotonNetwork.LocalPlayer.NickName = userInfo.name;
             return true;
         }
         catch(FirebaseException e)

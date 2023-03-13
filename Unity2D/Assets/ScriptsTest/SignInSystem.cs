@@ -59,6 +59,4 @@ public class SignInSystem : MonoBehaviour
 
         Result = await FirebaseAuthManager.Instance.SignIn(_id, _pw);
     }
-
-    public void SignUp() => _signUpPanel.SetActive(true);
 }

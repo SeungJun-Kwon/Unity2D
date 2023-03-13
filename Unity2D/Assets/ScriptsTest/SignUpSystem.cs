@@ -44,7 +44,7 @@ public class SignUpSystem : MonoBehaviour
             return;
         }
 
-        UserInfo userInfo = new UserInfo(_name);
+        UnitInfo userInfo = new UnitInfo(_name);
 
         Result = await FirebaseAuthManager.Instance.SignUp(_id, _pw, userInfo);
     }

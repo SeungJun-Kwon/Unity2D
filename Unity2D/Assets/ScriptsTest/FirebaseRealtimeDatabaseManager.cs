@@ -45,14 +45,14 @@ public class FirebaseReatimeDatabaseManager
             // 해당 ID를 사용하는 사용자가 이미 존재하는 경우
             if (snapshot.ChildrenCount > 0)
             {
-                Debug.LogWarning("UserInfo ID already exists.");
+                Debug.LogWarning("UnitInfo ID already exists.");
             }
             // 해당 ID를 사용하는 사용자가 존재하지 않는 경우
             else
             {
                 // 새로운 사용자 데이터 생성 및 저장
                 string key = user.UserId;
-                UserInfo userInfo = new UserInfo(user.Email);
+                UnitInfo userInfo = new UnitInfo(user.Email);
                 string json = JsonUtility.ToJson(userInfo);
                 _userDBRef.Child("users").Child(key).SetRawJsonValueAsync(json);
                 Debug.Log("New user added.");
@@ -60,7 +60,7 @@ public class FirebaseReatimeDatabaseManager
         });
     }
 
-    public void UpdateUserInfo(FirebaseUser user, UserInfo userInfo)
+    public void UpdateUserInfo(FirebaseUser user, UnitInfo userInfo)
     {
         _userDBRef.Child("users").OrderByChild("userID").EqualTo(user.Email).GetValueAsync().ContinueWith(task =>
         {
@@ -85,7 +85,7 @@ public class FirebaseReatimeDatabaseManager
         });
     }
 
-    public void LoadUserInfo(FirebaseUser user, System.Action<UserInfo> onComplete)
+    public void LoadUserInfo(FirebaseUser user, System.Action<UnitInfo> onComplete)
     {
         _userDBRef.Child("users").Child(user.UserId).GetValueAsync().ContinueWith(task =>
         {
@@ -102,7 +102,7 @@ public class FirebaseReatimeDatabaseManager
                 if (snapshot != null && snapshot.Value != null)
                 {
                     string json = snapshot.GetRawJsonValue();
-                    UserInfo userInfo = JsonUtility.FromJson<UserInfo>(json);
+                    UnitInfo userInfo = JsonUtility.FromJson<UnitInfo>(json);
                     onComplete(userInfo);
                 }
                 else

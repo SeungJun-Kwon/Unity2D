@@ -49,6 +49,8 @@ MonoBehaviour:
   - SetFirstSpawn
   - EnterState
   - ExitState
+  - LoadUserInfo
+  - SyncInit
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
