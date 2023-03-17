@@ -510,14 +510,6 @@ MonoBehaviour:
   _hpBar: {fileID: 8569314919864126471}
   _attackRange: {x: 1.5, y: 1.25}
   _weaponCol: {fileID: 0}
-  _stat:
-    _moveSpeed: 0
-    _atk: 0
-    _def: 0
-    _str: 0
-    _dex: 0
-    _int: 0
-    _luk: 0
   moveSpeed: 0
   atk: 0
   def: 0

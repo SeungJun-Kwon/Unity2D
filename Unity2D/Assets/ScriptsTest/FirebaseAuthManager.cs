@@ -50,7 +50,7 @@ public class FirebaseAuthManager
             }
 
             user = task.Result;
-            FirebaseFirestoreManager.Instance.CreateUser(user.UserId, userInfo);
+            FirebaseFirestoreManager.Instance.CreateUser(email, userInfo);
             Debug.Log("회원가입 완료");
         });
 
@@ -66,7 +66,7 @@ public class FirebaseAuthManager
         try
         {
             var result = await _auth.CreateUserWithEmailAndPasswordAsync(email, pw);
-            FirebaseFirestoreManager.Instance.CreateUser(result.UserId, userInfo);
+            FirebaseFirestoreManager.Instance.CreateUser(email, userInfo);
             return true;
         }
         catch(FirestoreException e)
@@ -111,6 +111,11 @@ public class FirebaseAuthManager
             var userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfo(_user);
             if (userInfo != null)
                 PhotonNetwork.LocalPlayer.NickName = userInfo.Name;
+            else
+            {
+                Debug.Log("유저 로드 실패");
+                return false;
+            }
             return true;
         }
         catch(FirebaseException e)

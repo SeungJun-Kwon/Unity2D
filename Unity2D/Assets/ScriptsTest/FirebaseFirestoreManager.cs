@@ -6,9 +6,6 @@ using Firebase.Firestore;
 using System;
 using System.Threading.Tasks;
 using Firebase;
-using UnityEngine.Rendering;
-using UnityEngine.SocialPlatforms;
-using Unity.VisualScripting.FullSerializer;
 
 public class FirebaseFirestoreManager
 {
@@ -18,7 +15,10 @@ public class FirebaseFirestoreManager
         get
         {
             if (instance == null)
+            {
                 instance = new FirebaseFirestoreManager();
+                instance.Init();
+            }
 
             return instance;
         }
@@ -47,9 +47,9 @@ public class FirebaseFirestoreManager
         _gameDataStore = FirebaseFirestore.GetInstance(fapp);
     }
 
-    public void CreateUser(string userId, UserInfo userInfo)
+    public void CreateUser(string userEmail, UserInfo userInfo)
     {
-        _userStore.Collection(_userInfo).Document(userId).GetSnapshotAsync().ContinueWith(task =>
+        _userStore.Collection(_userInfo).Document(userEmail).GetSnapshotAsync().ContinueWith(task =>
         {
             if (task.IsFaulted)
             {
@@ -68,30 +68,53 @@ public class FirebaseFirestoreManager
             else
             {
                 // 새로운 사용자 데이터 생성 및 저장
-                Dictionary<string, object> data = new Dictionary<string, object>
-                {
-                    {"name", userInfo.Name},
-                    {"lv", userInfo.Lv},
-                    {"hp", userInfo.Hp},
-                    {"mp", userInfo.Mp},
-                    {"exp", userInfo.Exp},
-                    {"moveSpeed", userInfo.MoveSpeed},
-                    {"atk", userInfo.Atk},
-                    {"def", userInfo.Def},
-                    {"str", userInfo.Str},
-                    {"dex", userInfo.Dex},
-                    {"int", userInfo.Int},
-                    {"luk", userInfo.Luk}
-                };
-                _userStore.Collection(_userInfo).Document(userId).SetAsync(data);
+                //Dictionary<string, object> data = new Dictionary<string, object>
+                //{
+                //    {"name", userInfo.Name},
+                //    {"lv", userInfo.Lv},
+                //    {"hp", userInfo.Hp},
+                //    {"mp", userInfo.Mp},
+                //    {"exp", userInfo.Exp},
+                //    {"moveSpeed", userInfo.MoveSpeed},
+                //    {"atk", userInfo.Atk},
+                //    {"def", userInfo.Def},
+                //    {"str", userInfo.Str},
+                //    {"dex", userInfo.Dex},
+                //    {"int", userInfo.Int},
+                //    {"luk", userInfo.Luk}
+                //};
+                //_userStore.Collection(_userInfo).Document(userEmail).SetAsync(data);
+                _userStore.Collection(_userInfo).Document(userEmail).SetAsync(userInfo);
                 Debug.Log("New user added.");
             }
         });
     }
 
+    public async Task<bool> CreateUnit(UnitInfo unitInfo)
+    {
+        try
+        {
+            var result = await _gameDataStore.Collection(_enemyInfo).Document(unitInfo.Name).GetSnapshotAsync();
+
+            if (result.Exists)
+            {
+                Debug.Log($"{unitInfo.Name}이(가) 이미 존재합니다.");
+                return false;
+            }
+
+            await _gameDataStore.Collection(_enemyInfo).Document(unitInfo.Name).SetAsync(unitInfo);
+            return true;
+        }
+        catch (FirestoreException e)
+        {
+            Debug.Log(e.Message);
+            return false;
+        }
+    }
+
     public void UpdateUserInfo(FirebaseUser user, UserInfo userInfo)
     {
-        _userStore.Collection(_userInfo).Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
+        _userStore.Collection(_userInfo).Document(user.Email).GetSnapshotAsync().ContinueWith(task =>
         {
             if (task.IsFaulted || task.IsCanceled)
             {
@@ -105,57 +128,33 @@ public class FirebaseFirestoreManager
 
                 if (snapshot.Exists)
                 {
-                    string key = user.UserId;
-                    Dictionary<string, object> data = new Dictionary<string, object>
-                    {
-                    {"name", userInfo.Name},
-                    {"lv", userInfo.Lv},
-                    {"hp", userInfo.Hp},
-                    {"mp", userInfo.Mp},
-                    {"exp", userInfo.Exp},
-                    {"moveSpeed", userInfo.MoveSpeed},
-                    {"atk", userInfo.Atk},
-                    {"def", userInfo.Def},
-                    {"str", userInfo.Str},
-                    {"dex", userInfo.Dex},
-                    {"int", userInfo.Int},
-                    {"luk", userInfo.Luk}
-                    };
-                    _userStore.Collection(_userInfo).Document(key).SetAsync(data);
+                    string key = user.Email;
+                    //Dictionary<string, object> data = new Dictionary<string, object>
+                    //{
+                    //{"name", userInfo.Name},
+                    //{"lv", userInfo.Lv},
+                    //{"hp", userInfo.Hp},
+                    //{"mp", userInfo.Mp},
+                    //{"exp", userInfo.Exp},
+                    //{"moveSpeed", userInfo.MoveSpeed},
+                    //{"atk", userInfo.Atk},
+                    //{"def", userInfo.Def},
+                    //{"str", userInfo.Str},
+                    //{"dex", userInfo.Dex},
+                    //{"int", userInfo.Int},
+                    //{"luk", userInfo.Luk}
+                    //};
+                    //_userStore.Collection(_userInfo).Document(key).SetAsync(data);
+                    _userStore.Collection(_userInfo).Document(key).SetAsync(userInfo);
                     Debug.Log("User Data Updated");
                 }
             }
         });
     }
 
-    public void Test(FirebaseUser user)
-    {
-        _userStore.Collection(_userInfo).Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
-        {
-            if (task.IsCanceled || task.IsFaulted)
-            {
-                Debug.Log("Failed to load user : " + task.Exception);
-                return;
-            }
-
-            if (task.IsCompleted)
-            {
-                DocumentSnapshot snapshot = task.Result;
-
-                if (snapshot.Exists)
-                {
-                    UserInfo ui = snapshot.ConvertTo<UserInfo>();
-                    Debug.Log(ui.Name);
-                }
-                else
-                    Debug.Log("0");
-            }
-        });
-    }
-
     public void LoadUserInfo(FirebaseUser user, Action<UserInfo> onComplete)
     {
-        _userStore.Collection(_userInfo).Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
+        _userStore.Collection(_userInfo).Document(user.Email).GetSnapshotAsync().ContinueWith(task =>
         {
             if(task.IsCanceled || task.IsFaulted)
             {
@@ -225,7 +224,7 @@ public class FirebaseFirestoreManager
     {
         try
         {
-            var result = await _userStore.Collection(_userInfo).Document(user.UserId).GetSnapshotAsync();
+            var result = await _userStore.Collection(_userInfo).Document(user.Email).GetSnapshotAsync();
             if (result.Exists)
             {
                 //Dictionary<string, object> d = result.ToDictionary();

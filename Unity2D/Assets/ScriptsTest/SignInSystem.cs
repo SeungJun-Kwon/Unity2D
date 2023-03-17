@@ -44,8 +44,6 @@ public class SignInSystem : MonoBehaviour
             _pwInput.text = "qnfiqnfi12";
             SignIn();
         }
-        if (Input.GetKeyDown(KeyCode.V))
-            FirebaseFirestoreManager.Instance.Test(FirebaseAuthManager.Instance._user);
     }
 
     bool Check()

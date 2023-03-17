@@ -1,5 +1,6 @@
 using Firebase.Firestore;
 using System;
+using WebSocketSharp;
 
 [Serializable]
 // 클래스를 파이어스토어에 매핑하기 위해 사용한다
@@ -15,10 +16,10 @@ public class UnitInfo
     public int Lv { get; set; }
 
     [FirestoreProperty("hp")]
-    public float Hp { get; set; }
+    public int Hp { get; set; }
 
     [FirestoreProperty("mp")]
-    public float Mp { get; set; }
+    public int Mp { get; set; }
 
     [FirestoreProperty("moveSpeed")]
     public float MoveSpeed { get; set; }
@@ -58,7 +59,7 @@ public class UnitInfo
         Def = def;
     }
 
-    public UnitInfo(string name, int lv, float hp, float mp, float moveSpeed, int atk, int def)
+    public UnitInfo(string name, int lv, int hp, int mp, float moveSpeed, int atk, int def)
     {
         Name = name;
         Lv = lv;
@@ -86,6 +87,11 @@ public class UnitInfo
                 field.SetValue(this, currentValue + (int)value);
             }
         }
+    }
+
+    public override string ToString()
+    {
+        return $"Name: {Name}, Lv: {Lv}, Hp: {Hp}, Mp: {Mp}, MoveSpeed: {MoveSpeed}, Atk: {Atk}, Def: {Def}";
     }
 }
 
@@ -127,7 +133,7 @@ public class UserInfo : UnitInfo
         Exp = 0;
     }
 
-    public UserInfo(string name, int lv, float hp, float mp, float moveSpeed, int atk, int def, int str, int dex, int _int, int luk, int exp)
+    public UserInfo(string name, int lv, int hp, int mp, float moveSpeed, int atk, int def, int str, int dex, int _int, int luk, int exp)
         : base(name, lv, hp, mp, moveSpeed, atk, def)
     {
         Str = str;
