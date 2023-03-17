@@ -192,6 +192,8 @@ MonoBehaviour:
   _moveSpeed: 0.5
   _maxSpeed: 3
   _jumpForce: 15
+  _curHp: 0
+  _curMp: 0
   _target: {fileID: 0}
 --- !u!114 &-6155132066395666310
 MonoBehaviour:

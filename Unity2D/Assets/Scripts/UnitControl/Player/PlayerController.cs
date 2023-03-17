@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using Cinemachine;
 using Unity.VisualScripting;
 using System;
+using System.Threading.Tasks;
 
 public class PlayerController : UnitController
 {
@@ -15,7 +16,13 @@ public class PlayerController : UnitController
 
     [HideInInspector] public BoxCollider2D _weaponCol;
 
+    public UserInfo _info;
+
     Canvas _canvas;
+
+    [SerializeField] float moveSpeed;
+    [SerializeField] int atk;
+    [SerializeField] int def;
 
     protected override void Awake()
     {
@@ -41,8 +48,8 @@ public class PlayerController : UnitController
             if (i.name == "Weapon")
             {
                 i.gameObject.TryGetComponent(out _weaponCol);
-                //if (_weaponCol && _weaponCol.isActiveAndEnabled)
-                //    _weaponCol.enabled = false;
+                if (_weaponCol && _weaponCol.isActiveAndEnabled)
+                    _weaponCol.enabled = false;
                 break;
             }
         }
@@ -50,8 +57,8 @@ public class PlayerController : UnitController
 
     private void Start()
     {
-        photonView.RPC("LoadUserInfo", RpcTarget.AllBuffered);
-        photonView.RPC("SyncInit", RpcTarget.AllBuffered);
+        if (photonView.IsMine)
+            photonView.RPC("LoadUserData", RpcTarget.AllBuffered);
     }
 
     protected override void Update()
@@ -65,16 +72,19 @@ public class PlayerController : UnitController
             }
             if (Input.GetButton("Attack"))
                 Attack();
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                _info.ModifyValue("_atk", 10);
+            }
         }
     }
 
     [PunRPC]
-    async void LoadUserInfo()
+    public async void LoadUserData()
     {
-        var result = await FirebaseFirestoreManager.Instance.LoadUserInfo(FirebaseAuthManager.Instance._user);
-
-        if (result != null)
-            _unitInfo = result;
+        _info = await FirebaseFirestoreManager.Instance.LoadUserInfo(FirebaseAuthManager.Instance._user);
+        _curHp = _info.Hp;
+        _curMp = _info.Mp;
     }
 
     public override void PlayAnimation(State state)

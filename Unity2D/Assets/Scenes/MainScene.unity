@@ -988,6 +988,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &280884509 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5583683553358685433, guid: a28f046da45cee642b5784e7f858ef77, type: 3}
+  m_PrefabInstance: {fileID: 5583683552624642157}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &320429573
 GameObject:
   m_ObjectHideFlags: 0
@@ -1186,10 +1191,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1712755297}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 1031608932}
+        m_TargetAssemblyTypeName: SignInSystem, Assembly-CSharp
+        m_MethodName: SignIn
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2257,7 +2262,7 @@ MonoBehaviour:
   _idInput: {fileID: 1534875096}
   _pwInput: {fileID: 994850466}
   _signUpPanel: {fileID: 1712755297}
-  _channelSellector: {fileID: 0}
+  _channelSellector: {fileID: 280884509}
 --- !u!1 &1055764393
 GameObject:
   m_ObjectHideFlags: 0
@@ -3194,17 +3199,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1031608932}
-        m_TargetAssemblyTypeName: SignInSystem, Assembly-CSharp
-        m_MethodName: SignUp
-        m_Mode: 1
+      - m_Target: {fileID: 1712755297}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!114 &1440577712
 MonoBehaviour:

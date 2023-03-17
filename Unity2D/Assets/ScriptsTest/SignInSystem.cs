@@ -36,6 +36,18 @@ public class SignInSystem : MonoBehaviour
         FirebaseFirestoreManager.Instance.Init();
     }
 
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Tab))
+        {
+            _idInput.text = "tyrnsorl123@naver.com";
+            _pwInput.text = "qnfiqnfi12";
+            SignIn();
+        }
+        if (Input.GetKeyDown(KeyCode.V))
+            FirebaseFirestoreManager.Instance.Test(FirebaseAuthManager.Instance._user);
+    }
+
     bool Check()
     {
         _id = _idInput.text.Trim();
@@ -46,8 +58,6 @@ public class SignInSystem : MonoBehaviour
 
         return true;
     }
-
-    public void OpenSignUp() => _signUpPanel.SetActive(true);
 
     public async void SignIn()
     {

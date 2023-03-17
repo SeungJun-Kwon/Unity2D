@@ -5,30 +5,10 @@ using UnityEngine;
 using Firebase.Firestore;
 using System;
 using System.Threading.Tasks;
-
-public class UnitInfo
-{
-    public string name;
-    public int lv;
-    public float hp;
-    public float mp;
-
-    public UnitInfo(string name)
-    {
-        this.name = name;
-        lv = 1;
-        hp = 50;
-        mp = 20;
-    }
-
-    public UnitInfo(string name, int lv, float hp, float mp)
-    {
-        this.name = name;
-        this.lv = lv;
-        this.hp = hp;
-        this.mp = mp;
-    }
-}
+using Firebase;
+using UnityEngine.Rendering;
+using UnityEngine.SocialPlatforms;
+using Unity.VisualScripting.FullSerializer;
 
 public class FirebaseFirestoreManager
 {
@@ -45,15 +25,31 @@ public class FirebaseFirestoreManager
     }
 
     private FirebaseFirestore _userStore = null;
+    FirebaseFirestore _gameDataStore = null;
+
+    string _userInfo = "userInfo";
+    string _enemyInfo = "enemyInfo";
 
     public void Init()
     {
         _userStore = FirebaseFirestore.DefaultInstance;
+        AppOptions app;
+        FirebaseApp fapp;
+        // 다른 파이어베이스 프로젝트를 가져오기 위한 앱 옵션
+        app = new AppOptions
+        {
+            ProjectId = "unity2dgamedata",
+            StorageBucket = "unity2dgamedata.appspot.com"
+        };
+        // 방금의 앱 옵션으로 파이어베이스 앱을 만듦(입력 데이터를 통해 파이어베이스에서 가져오는 것
+        fapp = FirebaseApp.Create(app, "Unity2DGameData");
+        // 파이어베이스 앱을 통해 파이어베이스 스토어를 가져옴
+        _gameDataStore = FirebaseFirestore.GetInstance(fapp);
     }
 
-    public void CreateUserInfo(string userId, UnitInfo userInfo)
+    public void CreateUser(string userId, UserInfo userInfo)
     {
-        _userStore.Collection("users").Document(userId).GetSnapshotAsync().ContinueWith(task =>
+        _userStore.Collection(_userInfo).Document(userId).GetSnapshotAsync().ContinueWith(task =>
         {
             if (task.IsFaulted)
             {
@@ -66,7 +62,7 @@ public class FirebaseFirestoreManager
             // 해당 ID를 사용하는 사용자가 이미 존재하는 경우
             if (snapshot.Exists)
             {
-                Debug.LogWarning("UnitInfo ID already exists.");
+                Debug.LogWarning("UserInfo ID already exists.");
             }
             // 해당 ID를 사용하는 사용자가 존재하지 않는 경우
             else
@@ -74,20 +70,28 @@ public class FirebaseFirestoreManager
                 // 새로운 사용자 데이터 생성 및 저장
                 Dictionary<string, object> data = new Dictionary<string, object>
                 {
-                    {"userName", userInfo.name},
-                    {"userLv", userInfo.lv},
-                    {"userHp", userInfo.hp},
-                    {"userMp", userInfo.mp}
+                    {"name", userInfo.Name},
+                    {"lv", userInfo.Lv},
+                    {"hp", userInfo.Hp},
+                    {"mp", userInfo.Mp},
+                    {"exp", userInfo.Exp},
+                    {"moveSpeed", userInfo.MoveSpeed},
+                    {"atk", userInfo.Atk},
+                    {"def", userInfo.Def},
+                    {"str", userInfo.Str},
+                    {"dex", userInfo.Dex},
+                    {"int", userInfo.Int},
+                    {"luk", userInfo.Luk}
                 };
-                _userStore.Collection("users").Document(userId).SetAsync(data);
+                _userStore.Collection(_userInfo).Document(userId).SetAsync(data);
                 Debug.Log("New user added.");
             }
         });
     }
 
-    public void UpdateUserInfo(FirebaseUser user, UnitInfo userInfo)
+    public void UpdateUserInfo(FirebaseUser user, UserInfo userInfo)
     {
-        _userStore.Collection("users").Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
+        _userStore.Collection(_userInfo).Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
         {
             if (task.IsFaulted || task.IsCanceled)
             {
@@ -104,21 +108,54 @@ public class FirebaseFirestoreManager
                     string key = user.UserId;
                     Dictionary<string, object> data = new Dictionary<string, object>
                     {
-                        {"userName", userInfo.name},
-                        {"userLv", userInfo.lv},
-                        {"userHp", userInfo.hp},
-                        {"userMp", userInfo.mp}
+                    {"name", userInfo.Name},
+                    {"lv", userInfo.Lv},
+                    {"hp", userInfo.Hp},
+                    {"mp", userInfo.Mp},
+                    {"exp", userInfo.Exp},
+                    {"moveSpeed", userInfo.MoveSpeed},
+                    {"atk", userInfo.Atk},
+                    {"def", userInfo.Def},
+                    {"str", userInfo.Str},
+                    {"dex", userInfo.Dex},
+                    {"int", userInfo.Int},
+                    {"luk", userInfo.Luk}
                     };
-                    _userStore.Collection("users").Document(key).SetAsync(data);
+                    _userStore.Collection(_userInfo).Document(key).SetAsync(data);
                     Debug.Log("User Data Updated");
                 }
             }
         });
     }
 
-    public void LoadUserInfo(FirebaseUser user, System.Action<UnitInfo> onComplete)
+    public void Test(FirebaseUser user)
     {
-        _userStore.Collection("users").Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
+        _userStore.Collection(_userInfo).Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
+        {
+            if (task.IsCanceled || task.IsFaulted)
+            {
+                Debug.Log("Failed to load user : " + task.Exception);
+                return;
+            }
+
+            if (task.IsCompleted)
+            {
+                DocumentSnapshot snapshot = task.Result;
+
+                if (snapshot.Exists)
+                {
+                    UserInfo ui = snapshot.ConvertTo<UserInfo>();
+                    Debug.Log(ui.Name);
+                }
+                else
+                    Debug.Log("0");
+            }
+        });
+    }
+
+    public void LoadUserInfo(FirebaseUser user, Action<UserInfo> onComplete)
+    {
+        _userStore.Collection(_userInfo).Document(user.UserId).GetSnapshotAsync().ContinueWith(task =>
         {
             if(task.IsCanceled || task.IsFaulted)
             {
@@ -128,17 +165,27 @@ public class FirebaseFirestoreManager
 
             if (task.IsCompleted)
             {
-
                 DocumentSnapshot snapshot = task.Result;
 
                 if (snapshot.Exists)
                 {
-                    string userName = snapshot.GetValue<string>("userName");
-                    int userLv = snapshot.GetValue<int>("userLv");
-                    float userHp = snapshot.GetValue<float>("userHp");
-                    float userMp = snapshot.GetValue<float>("userMp");
+                    //Dictionary<string, object> d = snapshot.ToDictionary();
+                    //string name = (string)d["name"];
+                    //int lv = Convert.ToInt32(d["lv"]);
+                    //int hp = Convert.ToInt32(d["hp"]);
+                    //int mp = Convert.ToInt32(d["mp"]);
+                    //float moveSpeed = Convert.ToSingle(d["moveSpeed"]);
+                    //int atk = Convert.ToInt32(d["atk"]);
+                    //int def = Convert.ToInt32(d["def"]);
+                    //int str = Convert.ToInt32(d["str"]);
+                    //int dex = Convert.ToInt32(d["dex"]);
+                    //int _int = Convert.ToInt32(d["int"]);
+                    //int luk = Convert.ToInt32(d["luk"]);
+                    //int exp = Convert.ToInt32(d["exp"]);
+                    //UserInfo userInfo = new UserInfo(name, lv, hp, mp, moveSpeed, atk, def, str, dex, _int, luk, exp);
 
-                    UnitInfo userInfo = new UnitInfo(userName, userLv, userHp, userMp);
+                    UserInfo userInfo = snapshot.ConvertTo<UserInfo>();
+
                     onComplete(userInfo);
                 }
                 else
@@ -147,19 +194,58 @@ public class FirebaseFirestoreManager
         });
     }
 
-    public async Task<UnitInfo> LoadUserInfo(FirebaseUser user)
+    public async Task<UnitInfo> LoadUnitInfo(string name)
     {
         try
         {
-            var result = await _userStore.Collection("users").Document(user.UserId).GetSnapshotAsync();
+            var result = await _gameDataStore.Collection(_enemyInfo).WhereEqualTo("name", name).GetSnapshotAsync();
+
+            if (result.Count > 0)
+            {
+                UnitInfo unitInfo = null;
+                foreach (DocumentSnapshot ds in result)
+                    unitInfo = ds.ConvertTo<UnitInfo>();
+
+                return unitInfo;
+            }
+            else
+            {
+                Debug.Log($"{name}이(가) 존재하지 않습니다.");
+                return null;
+            }
+        }
+        catch (FirestoreException e)
+        {
+            Debug.Log($"유닛 데이터 로드 실패 : {e.Message}");
+            return null;
+        }
+    }
+
+    public async Task<UserInfo> LoadUserInfo(FirebaseUser user)
+    {
+        try
+        {
+            var result = await _userStore.Collection(_userInfo).Document(user.UserId).GetSnapshotAsync();
             if (result.Exists)
             {
-                string userName = result.GetValue<string>("userName");
-                int userLv = result.GetValue<int>("userLv");
-                float userHp = result.GetValue<float>("userHp");
-                float userMp = result.GetValue<float>("userMp");
+                //Dictionary<string, object> d = result.ToDictionary();
+                //string name = (string)d["name"];
+                //int lv = Convert.ToInt32(d["lv"]);
+                //int hp = Convert.ToInt32(d["hp"]);
+                //int mp = Convert.ToInt32(d["mp"]);
+                //float moveSpeed = Convert.ToSingle(d["moveSpeed"]);
+                //int atk = Convert.ToInt32(d["atk"]);
+                //int def = Convert.ToInt32(d["def"]);
+                //int str = Convert.ToInt32(d["str"]);
+                //int dex = Convert.ToInt32(d["dex"]);
+                //int _int = Convert.ToInt32(d["int"]);
+                //int luk = Convert.ToInt32(d["luk"]);
+                //int exp = Convert.ToInt32(d["exp"]);
+                //UserInfo userInfo = new UserInfo(name, lv, hp, mp, moveSpeed, atk, def, str, dex, _int, luk, exp);
 
-                return new UnitInfo(userName, userLv, userHp, userMp);
+                UserInfo userInfo = result.ConvertTo<UserInfo>();
+
+                return userInfo;
             }
             else
                 return null;

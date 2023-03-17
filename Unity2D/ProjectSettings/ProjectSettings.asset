@@ -156,11 +156,12 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.MyUnity.Unity2D
     Standalone: com.MyUnity.Unity2D
+    iPhone: com.MyUnity.Unity2D
   buildNumber:
     Standalone: 0
     iPhone: 0
     tvOS: 0
-  overrideDefaultApplicationIdentifier: 1
+  overrideDefaultApplicationIdentifier: 0
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 22
   AndroidTargetSdkVersion: 0

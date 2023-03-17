@@ -35,13 +35,10 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
     [HideInInspector] public Animator _animator;
     [HideInInspector] public PhotonView _photonView;
 
-    [HideInInspector] public UnitInfo _unitInfo;
-
     public float _moveSpeed = 3f;
     public float _maxSpeed = 10f;
     public float _jumpForce = 15f;
-    
-    float _curHp, _curMp;
+    public float _curHp, _curMp;
 
     protected Dictionary<State, IState> _stateDic = new Dictionary<State, IState>();
     protected List<IState> _iStateArr = new List<IState>();
@@ -82,13 +79,6 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
             else
                 transform.position = Vector3.Lerp(transform.position, _curPos, Time.deltaTime * 10f);
         }
-    }
-
-    [PunRPC]
-    protected void SyncInit()
-    {
-        _curHp = _unitInfo.hp;
-        _curMp = _unitInfo.mp;
     }
 
     public virtual void Move(float moveX)
