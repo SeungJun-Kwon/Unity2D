@@ -1,8 +1,14 @@
+using Google.MiniJSON;
+using Photon.Pun;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class EnemyController : UnitController
 {
+    [SerializeField] string _name;
+
     [HideInInspector] public Transform _target;
 
     Vector3 _originPos;
@@ -21,7 +27,25 @@ public class EnemyController : UnitController
     private void Start()
     {
         _originPos = transform.position;
+
+        photonView.RPC("LoadUnitData", RpcTarget.AllBuffered);
     }
+
+
+    [PunRPC]
+    public async void LoadUnitData()
+    {
+        _info = await FirebaseFirestoreManager.Instance.LoadUnitInfo(_name);
+        if (_info == null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
+        _curHp = _info.Hp;
+        _curMp = _info.Mp;
+    }
+
 
     protected override void FixedUpdate()
     {
@@ -79,8 +103,9 @@ public class EnemyController : UnitController
         base.Move(moveX);
     }
 
-    public void Hurt()
+    public void Hurt(float damage)
     {
         _animator.SetTrigger("hurt");
+        photonView.RPC("ModifyHp", RpcTarget.AllBuffered, -damage);
     }
 }

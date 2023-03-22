@@ -108,7 +108,7 @@ public class FirebaseAuthManager
         {
             var result = await _auth.SignInWithEmailAndPasswordAsync(email, pw);
             _user = result;
-            var userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfo(_user);
+            var userInfo = await FirebaseFirestoreManager.Instance.LoadUserInfo(_user.Email);
             if (userInfo != null)
                 PhotonNetwork.LocalPlayer.NickName = userInfo.Name;
             else

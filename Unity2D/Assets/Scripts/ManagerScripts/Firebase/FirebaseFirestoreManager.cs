@@ -220,11 +220,11 @@ public class FirebaseFirestoreManager
         }
     }
 
-    public async Task<UserInfo> LoadUserInfo(FirebaseUser user)
+    public async Task<UserInfo> LoadUserInfo(string email)
     {
         try
         {
-            var result = await _userStore.Collection(_userInfo).Document(user.Email).GetSnapshotAsync();
+            var result = await _userStore.Collection(_userInfo).Document(email).GetSnapshotAsync();
             if (result.Exists)
             {
                 //Dictionary<string, object> d = result.ToDictionary();

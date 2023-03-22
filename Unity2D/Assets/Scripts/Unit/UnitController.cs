@@ -5,6 +5,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.Security.Cryptography;
 using System;
+using UnityEngine.UI;
 
 public enum State { IDLE, MOVE, JUMP, ATTACK, DIE, }
 public interface IState
@@ -34,6 +35,9 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
     [HideInInspector] public CapsuleCollider2D _collider;
     [HideInInspector] public Animator _animator;
     [HideInInspector] public PhotonView _photonView;
+    public UnitInfo _info;
+
+    public Image _hpBar;
 
     public float _moveSpeed = 3f;
     public float _maxSpeed = 10f;
@@ -184,5 +188,30 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
         {
             _curPos = (Vector3)stream.ReceiveNext();
         }
+    }
+
+    [PunRPC]
+    public void ModifyHp(float value)
+    {
+        if(FindState(State.DIE))
+            return;
+
+        _curHp += value;
+        if (_curHp > _info.Hp)
+            _curHp = _info.Hp;
+        else if (_curHp <= 0)
+        {
+            _curHp = 0;
+            Die();
+        }
+
+        _hpBar.fillAmount = _curHp / _info.Hp;
+    }
+
+    void Die()
+    {
+        foreach (var state in _stateArr)
+            photonView.RPC("ExitState", RpcTarget.AllBuffered, state);
+        photonView.RPC("EnterState", RpcTarget.AllBuffered, State.DIE);
     }
 }

@@ -401,6 +401,7 @@ GameObject:
   - component: {fileID: 8569314919338961711}
   - component: {fileID: 8569314919338961877}
   - component: {fileID: 8569314919338961709}
+  - component: {fileID: -7965953051116235826}
   - component: {fileID: 3193772305285427488}
   - component: {fileID: 668295440309305023}
   - component: {fileID: 4376212066132117174}
@@ -501,18 +502,29 @@ MonoBehaviour:
   _collider: {fileID: 0}
   _animator: {fileID: 0}
   _photonView: {fileID: 0}
+  _hpBar: {fileID: 8569314919864126471}
   _moveSpeed: 1
   _maxSpeed: 5
   _jumpForce: 15
   _curHp: 0
   _curMp: 0
   _nickName: {fileID: 8569314918900022431}
-  _hpBar: {fileID: 8569314919864126471}
   _attackRange: {x: 1.5, y: 1.25}
   _weaponCol: {fileID: 0}
-  moveSpeed: 0
-  atk: 0
-  def: 0
+  _playerManager: {fileID: 0}
+--- !u!114 &-7965953051116235826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8570313829719595066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e4c0fb171ddd944a57e7ea37386333, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _damage: 0
 --- !u!114 &3193772305285427488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -533,6 +545,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 8569314919338961709}
+  - {fileID: -7965953051116235826}
   - {fileID: 668295440309305023}
   - {fileID: 4376212066132117174}
   sceneViewId: 0

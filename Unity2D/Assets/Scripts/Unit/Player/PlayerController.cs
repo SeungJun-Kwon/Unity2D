@@ -11,18 +11,13 @@ using System.Threading.Tasks;
 public class PlayerController : UnitController
 {
     [SerializeField] Text _nickName;
-    [SerializeField] Image _hpBar;
     [SerializeField] Vector2 _attackRange;
 
     [HideInInspector] public BoxCollider2D _weaponCol;
 
-    public UserInfo _info;
+    public PlayerManager _playerManager;
 
     Canvas _canvas;
-
-    [SerializeField] float moveSpeed;
-    [SerializeField] int atk;
-    [SerializeField] int def;
 
     protected override void Awake()
     {
@@ -30,6 +25,8 @@ public class PlayerController : UnitController
         _stateDic.Add(State.IDLE, new PlayerIdle(this));
         _stateDic.Add(State.MOVE, new PlayerMove(this));
         _stateDic.Add(State.ATTACK, new PlayerAttack(this));
+
+        TryGetComponent(out _playerManager);
 
         transform.Find("Canvas").gameObject.TryGetComponent(out _canvas);
         _nickName.text = _photonView.IsMine ? PhotonNetwork.NickName : _photonView.Owner.NickName;
@@ -58,7 +55,10 @@ public class PlayerController : UnitController
     private void Start()
     {
         if (photonView.IsMine)
+        {
             photonView.RPC("LoadUserData", RpcTarget.AllBuffered);
+            _playerManager.photonView.RPC("LoadUserData", RpcTarget.AllBuffered, FirebaseAuthManager.Instance._user.Email);
+        }
     }
 
     protected override void Update()
@@ -74,7 +74,7 @@ public class PlayerController : UnitController
                 Attack();
             if (Input.GetKeyDown(KeyCode.Tab))
             {
-                _info.ModifyValue("_atk", 10);
+                Debug.Log(_playerManager._damage);
             }
         }
     }
@@ -82,7 +82,7 @@ public class PlayerController : UnitController
     [PunRPC]
     public async void LoadUserData()
     {
-        _info = await FirebaseFirestoreManager.Instance.LoadUserInfo(FirebaseAuthManager.Instance._user);
+        _info = await FirebaseFirestoreManager.Instance.LoadUserInfo(FirebaseAuthManager.Instance._user.Email);
         _curHp = _info.Hp;
         _curMp = _info.Mp;
     }
@@ -124,7 +124,7 @@ public class PlayerController : UnitController
             {
                 if (i.transform.gameObject.TryGetComponent(out EnemyController enemyController))
                 {
-                    enemyController.Hurt();
+                    enemyController.Hurt(_playerManager._damage);
                 }
             }
         }

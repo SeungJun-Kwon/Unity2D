@@ -189,11 +189,13 @@ MonoBehaviour:
   _collider: {fileID: 0}
   _animator: {fileID: 0}
   _photonView: {fileID: 0}
+  _hpBar: {fileID: 7818898415718226148}
   _moveSpeed: 0.5
   _maxSpeed: 3
   _jumpForce: 15
   _curHp: 0
   _curMp: 0
+  _name: Test
   _target: {fileID: 0}
 --- !u!114 &-6155132066395666310
 MonoBehaviour:

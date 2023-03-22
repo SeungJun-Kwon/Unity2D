@@ -1,6 +1,5 @@
 using Firebase.Firestore;
 using System;
-using WebSocketSharp;
 
 [Serializable]
 // 클래스를 파이어스토어에 매핑하기 위해 사용한다
