@@ -3,6 +3,48 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public class Equitment
+{
+    public string _head;
+    public string _body;
+    public string _hand;
+    public string _foot;
+    public string _weapon;
+
+    public Equitment()
+    {
+        _head = null;
+        _body = null;
+        _hand = null;
+        _foot = null;
+        _weapon = null;
+    }
+
+    public Equitment(string head, string body, string hand, string foot, string weapon)
+    {
+        _head = head;
+        _body = body;
+        _hand = hand;
+        _foot = foot;
+        _weapon = weapon;
+    }
+}
+
+public class Inventory
+{
+    public List<string> _itemArr = null;
+
+    public Inventory()
+    {
+        _itemArr = new List<string>();
+    }
+
+    public Inventory(List<string> itemArr)
+    {
+        _itemArr = itemArr;
+    }
+}
+
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance;
@@ -18,6 +60,9 @@ public class InventoryManager : MonoBehaviour
         get { return _curIndex; }
         set { _curIndex = value; }
     }
+
+    [SerializeField] List<ItemSO> cacheTest = new List<ItemSO>();
+    Dictionary<string, ItemSO> _itemCache = new Dictionary<string, ItemSO>();
 
     private void Awake()
     {
@@ -80,16 +125,49 @@ public class InventoryManager : MonoBehaviour
         _slots[CurIndex]._outline.enabled = true;
     }
 
-    public bool IsCurSlotEmpty() => _slots[CurIndex].IsEmpty;
-
     public void SaveSlots()
     {
+        Inventory inventory = new Inventory();
 
+        foreach(ItemSlot slot in _slots)
+        {
+            if(slot.Item != null)
+                inventory._itemArr.Add(slot.Item._name);
+            else
+                inventory._itemArr.Add("null");
+        }
+
+        string json = NewtonsoftJson.Instance.ObjectToJson(inventory);
+        NewtonsoftJson.Instance.SaveJsonFile("Assets/Resources/Json/", "Inventory", json);
     }
 
     public void LoadSlots()
     {
+        Inventory inventory = NewtonsoftJson.Instance.LoadJsonFile<Inventory>("Assets/Resources/Json/", "Inventory");
 
+        for (int i = 0; i < _slots.Count; i++)
+        {
+            if (inventory._itemArr[i] == "null")
+                _slots[i].Item = null;
+            else
+            {
+                if (_itemCache.TryGetValue(inventory._itemArr[i], out var value))
+                    _slots[i].Item = value;
+                else
+                {
+                    ItemSO itemSO = Resources.Load("ScriptableObject/ItemData/" + inventory._itemArr[i]) as ItemSO;
+                    _itemCache[inventory._itemArr[i]] = itemSO;
+                    cacheTest.Add(itemSO);
+                    _slots[i].Item = itemSO;
+                }
+            }
+        }
+    }
+
+    public void DeleteAll()
+    {
+        foreach (var item in _slots)
+            item.Item = null;
     }
 
     public void SortSlots()

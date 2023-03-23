@@ -28,17 +28,18 @@ public class JsonTest
     }
 }
 
-public class NewtonsoftJson : MonoBehaviour
+public class NewtonsoftJson
 {
-    public static NewtonsoftJson Instance { get; private set; }
-
-    private void Awake()
+    private static NewtonsoftJson _instance;
+    public static NewtonsoftJson Instance
     {
-        if (Instance == null)
-            Instance = this;
-        else if (Instance != this)
-            Destroy(this);
-        DontDestroyOnLoad(this);
+        get
+        {
+            if(_instance == null)
+                _instance = new NewtonsoftJson();
+
+            return _instance;
+        }
     }
 
     public string ObjectToJson(object obj)

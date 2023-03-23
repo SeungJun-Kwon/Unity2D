@@ -85,6 +85,18 @@ public class FirebaseFirestoreManager
                 //};
                 //_userStore.Collection(_userInfo).Document(userEmail).SetAsync(data);
                 _userStore.Collection(_userInfo).Document(userEmail).SetAsync(userInfo);
+                //Dictionary<string, object> equipDic = new Dictionary<string, object>
+                //{
+                //    {"head", "a" },
+                //    {"body", "b" }
+                //};
+                //Dictionary<string, object> invenDic = new Dictionary<string, object>
+                //{
+                //    {"1", "a" },
+                //    {"2", "b" }
+                //};
+                //_userStore.Collection(_userInfo).Document(userEmail).Collection("Item").Document("Equipment").SetAsync(equipDic);
+                //_userStore.Collection(_userInfo).Document(userEmail).Collection("Item").Document("Inventory").SetAsync(invenDic);
                 Debug.Log("New user added.");
             }
         });

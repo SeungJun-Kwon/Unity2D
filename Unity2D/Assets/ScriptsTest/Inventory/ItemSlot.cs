@@ -62,6 +62,9 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        _outline.enabled = false;
+        if (InventoryManager.Instance.CurIndex != -1 && InventoryManager.Instance._slots[InventoryManager.Instance.CurIndex] != this)
+            _outline.enabled = false;
+        else if (InventoryManager.Instance.CurIndex == -1)
+            _outline.enabled = false;
     }
 }
