@@ -11,6 +11,7 @@ public class UIController : MonoBehaviour
 
     [SerializeField] Text _roomName;
     [SerializeField] PlayerUI _playerUI;
+    [SerializeField] InventoryManager _inventoryManager;
 
     private void Awake()
     {
@@ -21,6 +22,17 @@ public class UIController : MonoBehaviour
         }
         else if(Instance != this)
             Destroy(gameObject);
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.I))
+        {
+            if (_inventoryManager.gameObject.activeSelf)
+                _inventoryManager.gameObject.SetActive(false);
+            else
+                _inventoryManager.gameObject.SetActive(true);
+        }
     }
 
     private void OnEnable()

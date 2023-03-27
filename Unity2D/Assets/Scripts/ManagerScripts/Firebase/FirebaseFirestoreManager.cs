@@ -6,6 +6,8 @@ using Firebase.Firestore;
 using System;
 using System.Threading.Tasks;
 using Firebase;
+using System.Linq;
+using System.Security.Cryptography;
 
 public class FirebaseFirestoreManager
 {
@@ -30,6 +32,8 @@ public class FirebaseFirestoreManager
     string _userInfo = "userInfo";
     string _enemyInfo = "enemyInfo";
 
+    int _inventoryCount = 0;
+
     public void Init()
     {
         _userStore = FirebaseFirestore.DefaultInstance;
@@ -41,10 +45,12 @@ public class FirebaseFirestoreManager
             ProjectId = "unity2dgamedata",
             StorageBucket = "unity2dgamedata.appspot.com"
         };
-        // 방금의 앱 옵션으로 파이어베이스 앱을 만듦(입력 데이터를 통해 파이어베이스에서 가져오는 것
+        // 방금의 앱 옵션으로 파이어베이스 앱을 만듦(입력 데이터를 통해 파이어베이스에서 가져오는 것)
         fapp = FirebaseApp.Create(app, "Unity2DGameData");
         // 파이어베이스 앱을 통해 파이어베이스 스토어를 가져옴
         _gameDataStore = FirebaseFirestore.GetInstance(fapp);
+
+        _inventoryCount = new Inventory()._capacity;
     }
 
     public void CreateUser(string userEmail, UserInfo userInfo)
@@ -85,18 +91,11 @@ public class FirebaseFirestoreManager
                 //};
                 //_userStore.Collection(_userInfo).Document(userEmail).SetAsync(data);
                 _userStore.Collection(_userInfo).Document(userEmail).SetAsync(userInfo);
-                //Dictionary<string, object> equipDic = new Dictionary<string, object>
-                //{
-                //    {"head", "a" },
-                //    {"body", "b" }
-                //};
-                //Dictionary<string, object> invenDic = new Dictionary<string, object>
-                //{
-                //    {"1", "a" },
-                //    {"2", "b" }
-                //};
-                //_userStore.Collection(_userInfo).Document(userEmail).Collection("Item").Document("Equipment").SetAsync(equipDic);
-                //_userStore.Collection(_userInfo).Document(userEmail).Collection("Item").Document("Inventory").SetAsync(invenDic);
+
+                Dictionary<string, object> invenDic = new Dictionary<string, object>();
+                for(int i = 0; i < _inventoryCount; i++)
+                    invenDic.Add(i.ToString(), "null");
+                _userStore.Collection(_userInfo).Document(userEmail).Collection("Item").Document("Inventory").SetAsync(invenDic);
                 Debug.Log("New user added.");
             }
         });
@@ -141,24 +140,35 @@ public class FirebaseFirestoreManager
                 if (snapshot.Exists)
                 {
                     string key = user.Email;
-                    //Dictionary<string, object> data = new Dictionary<string, object>
-                    //{
-                    //{"name", userInfo.Name},
-                    //{"lv", userInfo.Lv},
-                    //{"hp", userInfo.Hp},
-                    //{"mp", userInfo.Mp},
-                    //{"exp", userInfo.Exp},
-                    //{"moveSpeed", userInfo.MoveSpeed},
-                    //{"atk", userInfo.Atk},
-                    //{"def", userInfo.Def},
-                    //{"str", userInfo.Str},
-                    //{"dex", userInfo.Dex},
-                    //{"int", userInfo.Int},
-                    //{"luk", userInfo.Luk}
-                    //};
-                    //_userStore.Collection(_userInfo).Document(key).SetAsync(data);
                     _userStore.Collection(_userInfo).Document(key).SetAsync(userInfo);
                     Debug.Log("User Data Updated");
+                }
+            }
+        });
+    }
+
+    public void UpdateUserInventory(FirebaseUser user, Inventory inventory)
+    {
+        _userStore.Collection(_userInfo).Document(user.Email).Collection("Item").Document("Inventory").GetSnapshotAsync().ContinueWith(task =>
+        {
+            if (task.IsFaulted || task.IsCanceled)
+            {
+                Debug.Log("Failed to save user inventory : " + task.Exception);
+                return;
+            }
+
+            if(task.IsCompleted)
+            {
+                var result = task.Result;
+
+                if(result.Exists)
+                {
+                    Dictionary<string, object> data = new Dictionary<string, object>();
+                    for (int i = 0; i < inventory._capacity; i++)
+                        data.Add(i.ToString(), inventory._itemArr[i]);
+
+                    _userStore.Collection(_userInfo).Document(user.Email).Collection("Item").Document("Inventory").SetAsync(data);
+                    Debug.Log("User Inventory Data Updated");
                 }
             }
         });
@@ -239,21 +249,6 @@ public class FirebaseFirestoreManager
             var result = await _userStore.Collection(_userInfo).Document(email).GetSnapshotAsync();
             if (result.Exists)
             {
-                //Dictionary<string, object> d = result.ToDictionary();
-                //string name = (string)d["name"];
-                //int lv = Convert.ToInt32(d["lv"]);
-                //int hp = Convert.ToInt32(d["hp"]);
-                //int mp = Convert.ToInt32(d["mp"]);
-                //float moveSpeed = Convert.ToSingle(d["moveSpeed"]);
-                //int atk = Convert.ToInt32(d["atk"]);
-                //int def = Convert.ToInt32(d["def"]);
-                //int str = Convert.ToInt32(d["str"]);
-                //int dex = Convert.ToInt32(d["dex"]);
-                //int _int = Convert.ToInt32(d["int"]);
-                //int luk = Convert.ToInt32(d["luk"]);
-                //int exp = Convert.ToInt32(d["exp"]);
-                //UserInfo userInfo = new UserInfo(name, lv, hp, mp, moveSpeed, atk, def, str, dex, _int, luk, exp);
-
                 UserInfo userInfo = result.ConvertTo<UserInfo>();
 
                 return userInfo;
@@ -264,6 +259,30 @@ public class FirebaseFirestoreManager
         catch(FirestoreException e)
         {
             Debug.Log($"유저 데이터 로드 실패 : {e.Message}");
+            return null;
+        }
+    }
+
+    public async Task<Inventory> LoadUserInventory(string email)
+    {
+        try
+        {
+            var result = await _userStore.Collection(_userInfo).Document(email).Collection("Item").Document("Inventory").GetSnapshotAsync();
+            if (result.Exists)
+            {
+                Dictionary<string, object> invenDic = result.ToDictionary();
+                Inventory inventory = new Inventory();
+                for (int i = 0; i < invenDic.Count; i++)
+                    inventory._itemArr.Add(invenDic[i.ToString()].ToString());
+
+                return inventory;
+            }
+            else
+                return null;
+        }
+        catch(FirestoreException e)
+        {
+            Debug.Log($"유저 인벤토리 로드 실패 : {e.Message}");
             return null;
         }
     }

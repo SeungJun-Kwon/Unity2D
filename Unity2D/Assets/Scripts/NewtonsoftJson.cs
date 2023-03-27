@@ -5,29 +5,6 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Text;
 
-public class JsonTest
-{
-    public int monsterId;
-    public string monsterName;
-    public int monsterLv;
-    public int monsterHp;
-    public int monsterMp;
-    public int monsterDmg;
-
-    public JsonTest(bool isSet = true)
-    {
-        if (isSet)
-        {
-            monsterId = 1;
-            monsterName = "Default";
-            monsterLv = 1;
-            monsterHp = 1;
-            monsterMp = 1;
-            monsterDmg = 1;
-        }
-    }
-}
-
 public class NewtonsoftJson
 {
     private static NewtonsoftJson _instance;

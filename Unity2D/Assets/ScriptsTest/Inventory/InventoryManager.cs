@@ -34,6 +34,8 @@ public class Inventory
 {
     public List<string> _itemArr = null;
 
+    public int _capacity = 49;
+
     public Inventory()
     {
         _itemArr = new List<string>();
@@ -173,5 +175,15 @@ public class InventoryManager : MonoBehaviour
     public void SortSlots()
     {
 
+    }
+
+    private void OnEnable()
+    {
+        LoadSlots();
+    }
+
+    private void OnDisable()
+    {
+        SaveSlots();
     }
 }
