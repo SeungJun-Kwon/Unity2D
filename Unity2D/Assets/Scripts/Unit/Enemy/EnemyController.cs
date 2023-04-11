@@ -31,7 +31,6 @@ public class EnemyController : UnitController
         photonView.RPC("LoadUnitData", RpcTarget.AllBuffered);
     }
 
-
     [PunRPC]
     public async void LoadUnitData()
     {
@@ -42,10 +41,10 @@ public class EnemyController : UnitController
             return;
         }
 
+        _nameText.text = _info.Name;
         _curHp = _info.Hp;
         _curMp = _info.Mp;
     }
-
 
     protected override void FixedUpdate()
     {
@@ -101,11 +100,5 @@ public class EnemyController : UnitController
             EnterState(State.JUMP);
 
         base.Move(moveX);
-    }
-
-    public void Hurt(float damage)
-    {
-        _animator.SetTrigger("hurt");
-        photonView.RPC("ModifyHp", RpcTarget.AllBuffered, -damage);
     }
 }

@@ -34,7 +34,7 @@ public class SignInSystem : MonoBehaviour
         FirebaseAuthManager.Instance.Init();
         FirebaseReatimeDatabaseManager.Instance.Init();
         FirebaseFirestoreManager.Instance.Init();
-        FirebaseStorageManager.Instance.StartCoroutine(FirebaseStorageManager.Instance.Test());
+        FirebaseFirestoreManager.Instance.LoadItemData();
     }
 
     private void Update()

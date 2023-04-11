@@ -6,6 +6,7 @@ using Photon.Realtime;
 using System.Security.Cryptography;
 using System;
 using UnityEngine.UI;
+using TMPro;
 
 public enum State { IDLE, MOVE, JUMP, ATTACK, DIE, }
 public interface IState
@@ -35,9 +36,12 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
     [HideInInspector] public CapsuleCollider2D _collider;
     [HideInInspector] public Animator _animator;
     [HideInInspector] public PhotonView _photonView;
-    public UnitInfo _info;
 
+    public GameObject _unitGameUI;
+    public TMP_Text _nameText;
     public Image _hpBar;
+
+    public UnitInfo _info;
 
     public float _moveSpeed = 3f;
     public float _maxSpeed = 10f;
@@ -56,6 +60,14 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
         TryGetComponent(out _collider);
         TryGetComponent(out _animator);
         TryGetComponent(out _photonView);
+
+        if (photonView.IsMine)
+        {
+            GameObject unitGameUI = Resources.Load("Prefabs/UI/UnitGameUI") as GameObject;
+            _unitGameUI = Instantiate(unitGameUI, transform);
+            _unitGameUI.transform.Find("Name").gameObject.TryGetComponent(out _nameText);
+            _unitGameUI.transform.Find("HpBar").Find("Fill").gameObject.TryGetComponent(out _hpBar);
+        }
 
         _stateDic.Add(State.JUMP, new UnitJump(this));
     }
@@ -93,7 +105,7 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
         // 버퍼에 너무 많이 저장되면, 네트워크가 약한 클라이언트는 끊어질 수 있다고 한다.
         _photonView.RPC("MoveXRPC", RpcTarget.AllBuffered, moveX);
 
-        _rigidbody.AddForce(Vector2.right * moveX * _moveSpeed, ForceMode2D.Impulse);
+        _rigidbody.AddForce(Vector2.right * moveX * _moveSpeed * (_info.MoveSpeed / 100f), ForceMode2D.Impulse);
         if (_rigidbody.velocity.x > _maxSpeed)
             _rigidbody.velocity = new Vector2(_maxSpeed, _rigidbody.velocity.y);
         else if (_rigidbody.velocity.x < -_maxSpeed)
@@ -190,8 +202,20 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
+    public void Hurt(int damage)
+    {
+        _animator.SetTrigger("hurt");
+        Debug.Log(damage);
+        Debug.Log(Mathf.Round(100f / (100f + _info.Def) * damage));
+        damage = (int)Mathf.Round(100f / (100f + _info.Def) * damage);
+        Debug.Log(damage);
+        if (damage < 1)
+            damage = 1;
+        photonView.RPC("ModifyHp", RpcTarget.AllBuffered, -damage);
+    }
+
     [PunRPC]
-    public void ModifyHp(float value)
+    public void ModifyHp(int value)
     {
         if(FindState(State.DIE))
             return;

@@ -5,17 +5,17 @@ using UnityEngine;
 
 public class PlayerMove : IState
 {
-    UnitController _unitController;
-    public PlayerMove(UnitController unitController)
+    PlayerController _playerController;
+    public PlayerMove(PlayerController playerController)
     {
-        _unitController = unitController;
+        _playerController = playerController;
     }
 
     float _moveX;
 
     public void OnEnter()
     {
-        _unitController.PlayAnimation(State.MOVE);
+        _playerController.PlayAnimation(State.MOVE);
     }
 
     public void OnExit()
@@ -25,23 +25,23 @@ public class PlayerMove : IState
 
     public void OnUpdate()
     {
-        if (_unitController._photonView.IsMine)
+        if (_playerController._photonView.IsMine)
         {
             _moveX = Input.GetAxisRaw("Horizontal");
 
             if (_moveX == 0)
             {
-                _unitController.photonView.RPC("ExitState", RpcTarget.AllBuffered, State.MOVE);
-                _unitController.photonView.RPC("EnterState", RpcTarget.AllBuffered, State.IDLE);
-                //_unitController.ExitState(State.MOVE);
-                //_unitController.EnterState(State.IDLE);
+                _playerController.photonView.RPC("ExitState", RpcTarget.AllBuffered, State.MOVE);
+                _playerController.photonView.RPC("EnterState", RpcTarget.AllBuffered, State.IDLE);
+                //_playerController.ExitState(State.MOVE);
+                //_playerController.EnterState(State.IDLE);
             }
         }
     }
 
     public void OnFixedUpdate()
     {
-        if (_unitController._photonView.IsMine && _moveX != 0)
-            _unitController.Move(_moveX);
+        if (_playerController._photonView.IsMine && _moveX != 0)
+            _playerController.Move(_moveX);
     }
 }

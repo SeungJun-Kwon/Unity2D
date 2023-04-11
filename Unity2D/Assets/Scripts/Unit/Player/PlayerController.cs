@@ -2,22 +2,15 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using Cinemachine;
-using Unity.VisualScripting;
-using System;
-using System.Threading.Tasks;
 
 public class PlayerController : UnitController
 {
-    [SerializeField] Text _nickName;
     [SerializeField] Vector2 _attackRange;
 
     [HideInInspector] public BoxCollider2D _weaponCol;
 
     public PlayerManager _playerManager;
-
-    Canvas _canvas;
 
     protected override void Awake()
     {
@@ -27,10 +20,6 @@ public class PlayerController : UnitController
         _stateDic.Add(State.ATTACK, new PlayerAttack(this));
 
         TryGetComponent(out _playerManager);
-
-        transform.Find("Canvas").gameObject.TryGetComponent(out _canvas);
-        _nickName.text = _photonView.IsMine ? PhotonNetwork.NickName : _photonView.Owner.NickName;
-        _nickName.color = _photonView.IsMine ? Color.green : Color.red;
 
         if (_photonView.IsMine)
         {
@@ -54,6 +43,9 @@ public class PlayerController : UnitController
 
     private void Start()
     {
+        _nameText.text = _photonView.IsMine ? PhotonNetwork.NickName : _photonView.Owner.NickName;
+        _nameText.color = _photonView.IsMine ? Color.green : Color.red;
+
         if (photonView.IsMine)
         {
             photonView.RPC("LoadUserData", RpcTarget.AllBuffered);
@@ -74,7 +66,7 @@ public class PlayerController : UnitController
                 Attack();
             if (Input.GetKeyDown(KeyCode.Tab))
             {
-                Debug.Log(_playerManager._damage);
+                Debug.Log(_info.Atk);
             }
         }
     }
@@ -110,7 +102,7 @@ public class PlayerController : UnitController
     public override void MoveXRPC(float moveX)
     {
         base.MoveXRPC(moveX);
-        _canvas.transform.localScale = new Vector2(-moveX, 1f);
+        _unitGameUI.transform.localScale = new Vector2(-moveX, 1f);
     }
 
     public void TryAttack()
@@ -124,7 +116,8 @@ public class PlayerController : UnitController
             {
                 if (i.transform.gameObject.TryGetComponent(out EnemyController enemyController))
                 {
-                    enemyController.Hurt(_playerManager._damage);
+                    Debug.Log(_playerManager._userInfo.Atk);
+                    enemyController.Hurt(_playerManager._userInfo.Atk);
                 }
             }
         }

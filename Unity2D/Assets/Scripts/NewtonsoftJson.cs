@@ -4,6 +4,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.IO;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 public class NewtonsoftJson
 {
@@ -31,6 +32,8 @@ public class NewtonsoftJson
 
     public void SaveJsonFile(string createPath, string fileName, string jsonData)
     {
+        JObject jsonObj = JObject.Parse(jsonData);
+        jsonData = JsonConvert.SerializeObject(jsonObj, Formatting.Indented);
         FileStream fileStream = new FileStream(string.Format("{0}/{1}.json", createPath, fileName), FileMode.Create);
         byte[] data = Encoding.UTF8.GetBytes(jsonData);
         fileStream.Write(data, 0, data.Length);

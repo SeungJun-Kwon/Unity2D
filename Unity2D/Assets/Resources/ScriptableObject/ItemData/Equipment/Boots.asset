@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86904754df340b24982896c6c0ed6f47, type: 3}
+  m_Name: Boots
+  m_EditorClassIdentifier: 
+  _icon: {fileID: 21300000, guid: e420c5bc93cb2604695a893500c897e3, type: 3}
+  _type: 1
+  _name: Boots
+  _description: "\uBD80\uCE20"
+  _requiredLv: 1
+  _part: 0
+  _hp: 0
+  _mp: 0
+  _atk: 0
+  _def: 1
+  _moveSpeed: 0
+  _attackSpeed: 0
