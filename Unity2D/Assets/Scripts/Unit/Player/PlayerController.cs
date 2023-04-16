@@ -116,7 +116,6 @@ public class PlayerController : UnitController
             {
                 if (i.transform.gameObject.TryGetComponent(out EnemyController enemyController))
                 {
-                    Debug.Log(_playerManager._userInfo.Atk);
                     enemyController.Hurt(_playerManager._userInfo.Atk);
                 }
             }

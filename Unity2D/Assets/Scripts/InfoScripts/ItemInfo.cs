@@ -393,11 +393,11 @@ public class Inventory
             for(i = 0; i < _capacity; i++)
             {
                 if (_equipmentItemArr[i] != "null")
-                    continue;
-
+                    continue;                
                 EquipmentItemSO equip = item as EquipmentItemSO;
+                Debug.Log("ItemInfo -> AddItem");
                 _equipmentItemArr[i] = equip._name;
-                break;
+                return true;
             }
         }
         else if(item.GetType() == typeof(ConsumptionItemSO))
@@ -409,7 +409,7 @@ public class Inventory
 
                 ConsumptionItemSO consum = item as ConsumptionItemSO;
                 _consumptionItemArr[i] = consum._name;
-                break;
+                return true;
             }
         }
         else
@@ -421,15 +421,10 @@ public class Inventory
 
                 ItemSO material = item as ItemSO;
                 _itemArr[i] = material._name;
-                break;
+                return true;
             }
         }
 
-        if (i >= _capacity)
-            return false;
-
-        string json = NewtonsoftJson.Instance.ObjectToJson(this);
-        NewtonsoftJson.Instance.SaveJsonFile("Assets/Resources/Json", "Inventory", json);
-        return true;
+        return false;
     }
 }

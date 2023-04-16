@@ -64,6 +64,9 @@ public class PlayerManager : UnitManager
         NewtonsoftJson.Instance.SaveJsonFile(_jsonPath, "Equipment", json);
         json = NewtonsoftJson.Instance.ObjectToJson(_inventory);
         NewtonsoftJson.Instance.SaveJsonFile(_jsonPath, "Inventory", json);
+        Debug.Log($"PlayerManager -> SaveItems");
+        Debug.Log($"Inventory {_inventory}");
+        Debug.Log($"Json {json}");
 
         return Task.CompletedTask;
     }

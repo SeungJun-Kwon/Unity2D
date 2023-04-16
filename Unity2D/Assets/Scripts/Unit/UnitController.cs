@@ -205,10 +205,7 @@ public class UnitController : MonoBehaviourPunCallbacks, IPunObservable
     public void Hurt(int damage)
     {
         _animator.SetTrigger("hurt");
-        Debug.Log(damage);
-        Debug.Log(Mathf.Round(100f / (100f + _info.Def) * damage));
         damage = (int)Mathf.Round(100f / (100f + _info.Def) * damage);
-        Debug.Log(damage);
         if (damage < 1)
             damage = 1;
         photonView.RPC("ModifyHp", RpcTarget.AllBuffered, -damage);

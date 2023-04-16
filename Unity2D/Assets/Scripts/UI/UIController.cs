@@ -9,10 +9,10 @@ public class UIController : MonoBehaviour
 {
     private static UIController Instance;
 
-    [SerializeField] Text _roomName;
-    [SerializeField] PlayerUI _playerUI;
-    [SerializeField] InventoryManager _inventoryManager;
-    [SerializeField] EquipmentManager _equipmentManager;
+    public Text _roomName;
+    public PlayerUI _playerUI;
+    public InventoryManager _inventoryManager;
+    public EquipmentManager _equipmentManager;
 
     private void Awake()
     {

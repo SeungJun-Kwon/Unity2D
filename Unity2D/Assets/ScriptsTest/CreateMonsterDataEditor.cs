@@ -1,5 +1,8 @@
 using Firebase.Firestore;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.PackageManager.UI;
 using UnityEngine;
@@ -29,13 +32,40 @@ public class CreateMonsterDataEditor : EditorWindow
         window.maxSize = new Vector2(300f, 500f);
     }
 
+    void Init()
+    {
+        name = "";
+        lv = 0;
+        hp = 0;
+        mp = 0;
+        atk = 0;
+        def = 0;
+        moveSpeed = 0f;
+        gold = 0;
+        exp = 0;
+        items = new List<ItemInfo>();
+        selectedItems = new List<int>();
+    }
+
     private void OnGUI()
     {
         LoadItemData();
 
         if (options != null)
         {
+            GUILayout.BeginVertical();
             name = EditorGUILayout.TextField("Name", name);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Search Enemy") && name != "")
+            {
+                SearchEnemy(name);
+            }
+            if (GUILayout.Button("Clear"))
+            {
+                Init();
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
             EditorGUILayout.Space();
             lv = EditorGUILayout.IntField("Level", lv);
             EditorGUILayout.Space();
@@ -87,6 +117,28 @@ public class CreateMonsterDataEditor : EditorWindow
             Debug.Log($"{enemyInfo.Name}이(가) 추가되었습니다.");
             Close();
         }
+    }
+
+    async void SearchEnemy(string name)
+    {
+        var result = await FirebaseFirestoreManager.Instance.LoadEnemyInfo(name);
+
+        if (result == null)
+        {
+            Debug.Log($"{name} 몬스터를 찾을 수 없습니다.");
+            return;
+        }
+
+        lv = result.Lv;
+        hp = result.Hp;
+        mp = result.Mp;
+        atk = result.Atk;
+        def = result.Def;
+        moveSpeed = result.MoveSpeed;
+        gold = result.Gold;
+        exp = result.Exp;
+        foreach (var item in result.DropItems)
+            selectedItems.Add(Array.IndexOf(options, item));
     }
 
     bool CheckInputFields()

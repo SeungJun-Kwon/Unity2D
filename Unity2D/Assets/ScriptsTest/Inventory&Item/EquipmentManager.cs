@@ -89,6 +89,7 @@ public class EquipmentManager : MonoBehaviour
 
     public async void UnEquipItem(EquipmentItemSO item)
     {
+        Debug.Log("EquipmentManager -> UnEquipItem");
         if (!_playerManager._inventory.AddItem(item))
             return;
 

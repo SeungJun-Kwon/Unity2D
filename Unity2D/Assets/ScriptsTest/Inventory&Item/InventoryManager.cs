@@ -15,6 +15,23 @@ public class InventoryManager : MonoBehaviour
     public GameObject _slotPanel;
     public List<ItemSlot> _slots = null;
 
+    public GrabbedSlot _grabbedSlot;
+
+    public GameObject _tooltipPanel;
+    ItemTooltip _itemTooltip;
+    public ItemTooltip ItemTooltip
+    {
+        get
+        {
+            if (_itemTooltip == null)
+                _tooltipPanel.TryGetComponent(out _itemTooltip);
+
+            return _itemTooltip;
+        }
+    }
+
+    public RectTransform _rect;
+
     [SerializeField] int _curIndex;
     public int CurIndex
     {
@@ -50,6 +67,8 @@ public class InventoryManager : MonoBehaviour
             Instance = this;
         else if (Instance != this)
             Destroy(gameObject);
+
+        TryGetComponent(out _rect);
 
         Inventory inventory = NewtonsoftJson.Instance.LoadJsonFile<Inventory>(_jsonPath, "Inventory");
 
@@ -93,7 +112,7 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        SaveInventoryForPlayer();
+        SavePlayerInventory();
     }
 
     public void RemoveItem(ItemSlot slot)
@@ -107,73 +126,46 @@ public class InventoryManager : MonoBehaviour
             _materials[index] = "null";
         _slots[index].Item = null;
 
-        SaveInventoryForPlayer();
+        SavePlayerInventory();
     }
 
-    public void MoveItem(ItemSlot slot)
+    public void SwapItem(ItemSlot slot1, ItemSlot slot2)
     {
-        if (CurIndex == -1)
+        int index1 = _slots.IndexOf(slot1);
+        int index2 = _slots.IndexOf(slot2);
+
+        // 아이템 슬롯 두 개가 같은 경우
+        if (index1 == index2)
             return;
 
-        int selectedIndex = _slots.IndexOf(slot);
-
-        _slots[CurIndex]._outline.enabled = false;
-        slot._outline.enabled = false;
-
-        if (_slots[CurIndex] == slot)
+        if (CurTab == (int)SelectedTab.Equipment)
         {
-            CurIndex = -1;
-            return;
+            string tmp = _equipments[index2];
+            _equipments[index2] = _equipments[index1];
+            _equipments[index1] = tmp;
+        }
+        else if (CurTab == (int)SelectedTab.Comsumption)
+        {
+            string tmp = _consumptions[index2];
+            _consumptions[index2] = _consumptions[index1];
+            _consumptions[index1] = tmp;
+        }
+        else if (CurTab == (int)SelectedTab.Material)
+        {
+            string tmp = _materials[index2];
+            _materials[index2] = _materials[index1];
+            _materials[index1] = tmp;
         }
 
-        if(slot.IsEmpty)
-        {
-            if(CurTab == (int)SelectedTab.Equipment)
-            {
-                _equipments[selectedIndex] = _equipments[CurIndex];
-                _equipments[CurIndex] = "null";
-            }
-            else if(CurTab == (int)SelectedTab.Comsumption)
-            {
-                _consumptions[selectedIndex] = _consumptions[CurIndex];
-                _consumptions[CurIndex] = "null";
-            }
-            else if(CurTab == (int)SelectedTab.Material)
-            {
-                _materials[selectedIndex] = _materials[CurIndex];
-                _materials[CurIndex] = "null";
-            }
-            slot.Item = _slots[CurIndex].Item;
-            _slots[CurIndex].Item = null;
-        }
-        else
-        {
-            if (CurTab == (int)SelectedTab.Equipment)
-            {
-                string tmp = _equipments[selectedIndex];
-                _equipments[selectedIndex] = _equipments[CurIndex];
-                _equipments[CurIndex] = tmp;
-            }
-            else if (CurTab == (int)SelectedTab.Comsumption)
-            {
-                string tmp = _consumptions[selectedIndex];
-                _consumptions[selectedIndex] = _consumptions[CurIndex];
-                _consumptions[CurIndex] = tmp;
-            }
-            else if (CurTab == (int)SelectedTab.Material)
-            {
-                string tmp = _materials[selectedIndex];
-                _materials[selectedIndex] = _materials[CurIndex];
-                _materials[CurIndex] = tmp;
-            }
-            ItemSO item = slot.Item;
-            slot.Item = _slots[CurIndex].Item;
-            _slots[CurIndex].Item = item;
-        }
-        SaveInventoryForPlayer();
+        ItemSO tmpItem = null;
+        if (slot2.Item != null)
+            tmpItem = slot2.Item;
+        slot2.Item = slot1.Item;
+        slot1.Item = tmpItem;
 
-        CurIndex = -1;
+        SavePlayerInventory();
     }
+
 
     public void SelectItem(ItemSlot slot)
     {
@@ -181,7 +173,7 @@ public class InventoryManager : MonoBehaviour
         _slots[CurIndex]._outline.enabled = true;
     }
 
-    public void SaveInventoryForPlayer() => _playerManager._inventory = new Inventory(_equipments, _consumptions, _materials);
+    public void SavePlayerInventory() => _playerManager._inventory = new Inventory(_equipments, _consumptions, _materials);
 
     public Task SaveSlots()
     {
@@ -290,6 +282,7 @@ public class InventoryManager : MonoBehaviour
 
             _playerManager._userInfo.UnequipItem(slot.Item as EquipmentItemSO);
             _playerManager._userInfo.EquipItem(item);
+            _playerManager._inventory._equipmentItemArr = _equipments;
             await _playerManager.SaveItems();
         }
 
